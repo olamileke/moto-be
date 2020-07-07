@@ -16,6 +16,12 @@ class User {
 
         return db.collection('users').insertOne(this);
     }
+
+    static findByEmail(email) {
+        const db = getDB();
+
+        return db.collection('users').findOne({ email:email })
+    }
 }
 
 module.exports = User;

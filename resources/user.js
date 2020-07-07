@@ -15,13 +15,22 @@ exports.post = (req, res, next) => {
     }
 
     const name = req.body.name;
-    const email = req.body.email;
+    const email = req.body.email.toLowerCase();
     const password = req.body.password;
     let admin;
     req.query.admin == true ? admin = true : admin = false;
     const avatar = app_url + '/images/users/anon.png';
 
-    bcrypt.hash(password, 12)
+    User.findByEmail(email)
+    .then(user => {
+        if(user) {
+            const error = Error('user exists already');
+            error.statusCode = 403;
+            throw error;
+        }
+
+        return bcrypt.hash(password, 12);
+    })
     .then(hashedPassword => {
         const user = new User(name, email, hashedPassword, admin, avatar, null, Date.now());
         return user.save();
