@@ -18,7 +18,7 @@ exports.post = (req, res, next) => {
     const email = req.body.email.toLowerCase();
     const password = req.body.password;
     let admin;
-    req.query.admin == true ? admin = true : admin = false;
+    req.query.admin == 'true' ? admin = true : admin = false;
     const avatar = app_url + '/images/users/anon.png';
 
     User.findByEmail(email)
