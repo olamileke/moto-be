@@ -15,9 +15,12 @@ class Vehicle {
         return db.collection('vehicles').insertOne(this);
     }
 
-    get() {
+    static get(admin) {
         const db = getDB();
-        return db.collection('vehicles').find().toArray();
+
+        if(admin) {
+             return db.collection('vehicles').find().sort({ created_at:-1 }).toArray();
+        }
     }
 }
 

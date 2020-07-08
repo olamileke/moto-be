@@ -1,30 +1,28 @@
-const Vehicle = require('../models/vehicle');
+const Route = require('../models/route');
 const { validationResult } = require('express-validator');
-const app_url = require('../utils/config').app_url;
 
 exports.post = (req, res, next) => {
-
     const errors = validationResult(req);
 
     if(!errors.isEmpty()) {
         const error = new Error('validation failed');
         error.statusCode = 422;
-        throw error;
+        error.errors = errors;
+        throw err;
     }
 
-    const model = req.body.model;
-    const plate_number = req.body.plate_number;
-    const picture = app_url + req.file.path.replace(/\\/g, '/');
+    const name = req.body.name;
+    const description = req.body.description;
 
-    const vehicle = new Vehicle(model, plate_number, picture, null, Date.now());
+    const route = new Route(name, description, 0, Date.now());
 
-    vehicle.save()
+    route.save()
     .then(({ op }) => {
         res.status(201).json({
             data:{
-                vehicle:op
+                route:op
             }
-        }) 
+        })
     })
     .catch(err => {
         if(!err.statusCode) {
@@ -32,23 +30,24 @@ exports.post = (req, res, next) => {
         }
 
         next(err);
-    }) 
+    })
 }
 
 exports.get = (req, res, next) => {
-    let admin;
-    req.query.admin == 'true' ? admin = true : admin = false;
 
-    Vehicle.get(admin)
-    .then(vehicles => {
+    Route.get()
+    .then(routes => {
         res.status(200).json({
             data:{
-                vehicles:vehicles
+                routes:routes
             }
         })
     })
     .catch(err => {
-        err.statusCode = 500;
+        if(!err.statusCode) {
+            err.statusCode = 500;
+        }
+
         next(err);
     })
 }

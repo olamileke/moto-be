@@ -5,6 +5,7 @@ const database = require('./utils/database');
 const userRoutes = require('./routes/user');
 const authRoutes = require('./routes/auth');
 const vehicleRoutes = require('./routes/vehicles');
+const routeRoutes = require('./routes/routes');
 
 app = express();
 
@@ -21,6 +22,7 @@ app.use('/images', express.static(path.join(__dirname, 'images')))
 app.use(userRoutes);
 app.use(authRoutes);
 app.use(vehicleRoutes);
+app.use(routeRoutes);
 
 app.use((err, req, res, next) => {
     console.log(err);
