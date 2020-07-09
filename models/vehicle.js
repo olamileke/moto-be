@@ -26,6 +26,11 @@ class Vehicle {
         return db.collection('vehicles').updateOne({ _id:new ObjectID(id) }, { $set:{ pending:pending } });
     }
 
+    static setReservedTill(id, dateStamp) {
+        const db = getDB();
+        return db.collection('vehicles').updateOne({ _id:new ObjectID(id) }, { $set:{ reserved_till:dateStamp } });
+    }
+
     static get(admin) {
         const db = getDB();
 

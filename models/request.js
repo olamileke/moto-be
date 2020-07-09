@@ -19,6 +19,16 @@ class Request {
         return db.collection('requests').insertOne(this);
     }
 
+    static findByID(id) {
+        const db = getDB();
+        return db.collection('requests').findOne({ _id:new ObjectID(id) });
+    }
+
+    static setApprovedState(id, approved) {
+        const db = getDB();
+        return db.collection('requests').updateOne({ _id:new ObjectID(id) }, { $set:{ approved:approved, pending:false } });
+    }
+
     static get(admin, userId) {
         const db = getDB();
 

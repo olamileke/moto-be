@@ -2,6 +2,7 @@ const Request = require('../models/request');
 const Vehicle = require('../models/vehicle');
 const { validationResult } = require('express-validator');
 const Route = require('../models/route');
+const User = require('../models/user');
 
 exports.post = (req, res, next) => {
     const errors = validationResult(req);
@@ -85,6 +86,69 @@ exports.get = (req, res, next) => {
         if(!err.statusCode) {
             err.statusCode = 500;
         }
+        next(err);
+    })
+}
+
+exports.patch = (req, res, next) => {
+
+    const errors = validationResult(req);
+
+    if(!errors.isEmpty()) {
+        const error = new Error('validation failed');
+        error.statusCode = 422;
+        error.errors = errors;
+        throw errors;
+    }
+
+    const requestID = req.body.requestID;
+    let approved, patchedRequest;
+    req.query.approved == 'true' ? approved = true : approved = false;
+
+    Request.findByID(requestID)
+    .then(request => {
+        if(!request) {
+            const error = Error('invalid vehicle request');
+            error.statusCode = 404;
+            throw error;
+        }
+
+        patchedRequest = request;
+        return;
+    })
+    .then(() => {
+        return Request.setApprovedState(requestID, approved);
+    })
+    .then(() => {
+        return Vehicle.setPending(patchedRequest.vehicle._id, false);
+    })
+    .then(() => {
+        return Vehicle.setReservedTill(patchedRequest.vehicle_id, patchedRequest.expires_at);
+    })
+    .then(() => {
+        if(approved) {
+            return Route.updateTrips(patchedRequest.route._id);
+        }
+        return new Promise();
+    })
+    .then(() => {
+        if(approved) {
+            return User.setBusyTime(patchedRequest.user._id, patchedRequest.expires_at);
+        }
+        return new Promise();
+    })
+    .then(() => {
+        res.status(200).json({
+            data:{
+                request:patchedRequest
+            }
+        })
+    })
+    .catch(err => {
+        if(!err.statusCode) {
+            err.statusCode = 500;
+        }
+
         next(err);
     })
 }

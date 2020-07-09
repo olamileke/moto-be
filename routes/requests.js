@@ -12,6 +12,6 @@ body('routeID').isLength({ min:24 }), body('days').isNumeric() ], requests.post)
 
 router.get('/requests', authenticate, authorize, requests.get )
 
-router.patch('/requests', authenticate, admin, requests.patch)
+router.patch('/requests', authenticate, admin, [ body('requestID').isLength({ min:24 }) ] , requests.patch)
 
 module.exports = router;

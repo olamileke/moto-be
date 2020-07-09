@@ -38,6 +38,11 @@ class User {
         const db = getDB();
         return db.collection('users').find({ admin:false }).sort({ created_at:-1 }).toArray()
     }
+
+    static setBusyTime(id, dateStamp) {
+        const db = getDB();
+        return db.collection('users').updateOne({ _id:new ObjectID(id) }, { $set:{ busy_till:dateStamp } })
+    }
 }
 
 module.exports = User;

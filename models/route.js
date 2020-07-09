@@ -23,6 +23,16 @@ class Route {
         const db = getDB();
         return db.collection('routes').find().sort({ created_at:-1 }).toArray();
     }
+
+    static updateTrips(id) {
+        const db = getDB();
+        return Route.findByID(id)
+        .then(route => {
+            const trips = route.trips + 1;
+            return db.collection('routes').updateOne({ _id:new ObjectID(id) }, { $set:{ trips:trips } });
+        })
+        
+    }
 }
 
 module.exports = Route;
