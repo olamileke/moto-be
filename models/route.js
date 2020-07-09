@@ -1,4 +1,5 @@
 const getDB = require('../utils/database').getDB;
+const ObjectID = require('mongodb').ObjectID;
 
 class Route {
     constructor(name, description, trips, created_at) {
@@ -11,6 +12,11 @@ class Route {
     save() {
         const db = getDB();
         return db.collection('routes').insertOne(this);
+    }
+
+    static findByID(id) {
+        const db = getDB();
+        return db.collection('routes').findOne({ _id:new ObjectID(id) });
     }
 
     static get() {

@@ -21,6 +21,11 @@ class Vehicle {
         return db.collection('vehicles').findOne({ _id:new ObjectID(id) });
     }
 
+    static setPending(id, pending) {
+        const db = getDB();
+        return db.collection('vehicles').updateOne({ _id:new ObjectID(id) }, { $set:{ pending:pending } });
+    }
+
     static get(admin) {
         const db = getDB();
 
@@ -28,7 +33,7 @@ class Vehicle {
             return db.collection('vehicles').find().sort({ created_at:-1 }).toArray();
         }
 
-        return db.collection('vehicles').find({ reserved_till:{ $lt:Date.now() } }).sort({ created_at:-1 }).toArray();
+        return db.collection('vehicles').find({ pending:false }, { reserved_till:{ $lt:Date.now() } }).sort({ created_at:-1 }).toArray();
     }
 }
 

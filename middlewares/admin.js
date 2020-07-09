@@ -9,8 +9,11 @@ module.exports = (req, res, next) => {
             error.statusCode = 403;
             throw error;
         }
+        else {
+            next();
+        }
+    }
+    else {
         next();
     }
-
-    next();
 }

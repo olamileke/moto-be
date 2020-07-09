@@ -15,7 +15,7 @@ router.post('/vehicles', authenticate, admin, multer , [ body('model').isLength(
                                return true;
                            }),
                            body('plate_number').isLength({ min:7 }), vehicles.post ])
-
+                           
 router.get('/vehicles', authenticate, admin, vehicles.get);
 
 module.exports = router;

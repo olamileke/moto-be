@@ -3,9 +3,12 @@ const router = express.Router();
 const authenticate = require('../middlewares/authenticate');
 const requests = require('../resources/requests');
 const { body } = require('express-validator');
+const driver  = require('../middlewares/driver');
+const admin = require('../middlewares/admin');
 
-router.post('/requests', authenticate, [ body('vehicleID').isLength({ min:24 }),
-                                         body('routeID').isLength({ min:24 }),
-                                         body('days').isNumeric() ], requests.post);
+router.post('/requests', authenticate, driver, [ body('vehicleID').isLength({ min:24 }),
+body('routeID').isLength({ min:24 }), body('days').isNumeric() ], requests.post);
+
+router.get('/requests', authenticate, admin, requests.get )
 
 module.exports = router;

@@ -39,8 +39,8 @@ exports.get = (req, res, next) => {
     let admin;
     req.query.admin == 'true' ? admin = true : admin = false;
 
-    Vehicle.get(admin)
-    .then(vehicles => {
+    Vehicle.get(admin) 
+    .then(vehicles => { 
         res.status(200).json({
             data:{
                 vehicles:vehicles
