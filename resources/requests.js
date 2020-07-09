@@ -43,7 +43,7 @@ exports.post = (req, res, next) => {
         delete route.created_at;
         requested_route = route;
 
-        const expires_at = Date.now() + (days * 24 * 60 * 60);
+        const expires_at = Date.now() + (days * 24 * 60 * 60 * 1000);
         const request = new Request(user, requested_vehicle, requested_route, false, true, expires_at, Date.now());
         return request.save();
     })
@@ -64,6 +64,27 @@ exports.post = (req, res, next) => {
             err.statusCode = 500;
         }
 
+        next(err);
+    })
+}
+
+exports.get = (req, res, next) => {
+    let admin;
+    
+    req.query.admin == 'true' ? admin = true : admin = false;
+
+    Request.get(admin, req.user._id)
+    .then(requests => {
+        res.status(200).json({
+            data:{
+                requests:requests
+            }
+        })
+    })
+    .catch(err => {
+        if(!err.statusCode) {
+            err.statusCode = 500;
+        }
         next(err);
     })
 }

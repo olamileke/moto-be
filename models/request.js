@@ -1,3 +1,5 @@
+const { ObjectID } = require('mongodb');
+
 const getDB = require('../utils/database').getDB;
 
 class Request {
@@ -15,6 +17,16 @@ class Request {
     save() {
         const db = getDB();
         return db.collection('requests').insertOne(this);
+    }
+
+    static get(admin, userId) {
+        const db = getDB();
+
+        if(admin) {
+            return db.collection('requests').find().sort({ created_at:-1 }).toArray();
+        }
+
+        return db.collection('requests').find({ 'user._id':new ObjectID(userId) }).sort({ created_at:-1 }).toArray();
     }
 }
 

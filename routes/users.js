@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const authenticate = require('../middlewares/authenticate');
 const admin = require('../middlewares/admin');
+const authenticate = require('../middlewares/authenticate');
 const multer = require('../middlewares/multer');
 const { body } = require('express-validator');
 const users = require('../resources/users');
