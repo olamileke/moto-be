@@ -7,6 +7,6 @@ const admin = require('../middlewares/admin');
 
 router.post('/routes', authenticate, admin, [ body('name').isLength({ min:6 }), body('description').isLength({ min:40 }) ], routes.post);
 
-router.get('/routes', authenticate, admin, routes.get);
+router.get('/routes', authenticate, routes.get);
 
 module.exports = router;

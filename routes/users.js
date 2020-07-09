@@ -1,7 +1,10 @@
 const express = require('express');
 const router = express.Router();
+const authenticate = require('../middlewares/authenticate');
+const admin = require('../middlewares/admin');
+const multer = require('../middlewares/multer');
 const { body } = require('express-validator');
-const user = require('../resources/user');
+const users = require('../resources/users');
 
 router.post('/users', [ body('name')
               .isLength({ min:6 })
@@ -15,6 +18,10 @@ router.post('/users', [ body('name')
                   return true;
               }, 
               body('email').isEmail(),
-              body('password').isLength({ min:8 })) ], user.post);   
+              body('password').isLength({ min:8 })) ], users.post);  
+
+router.get('/users', authenticate, admin, users.get);
+
+router.patch('/users', authenticate, multer, users.patch);
               
 module.exports = router;

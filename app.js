@@ -2,10 +2,11 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
 const database = require('./utils/database');
-const userRoutes = require('./routes/user');
+const userRoutes = require('./routes/users');
 const authRoutes = require('./routes/auth');
 const vehicleRoutes = require('./routes/vehicles');
 const routeRoutes = require('./routes/routes');
+const requestRoutes = require('./routes/requests');
 
 app = express();
 
@@ -23,6 +24,7 @@ app.use(userRoutes);
 app.use(authRoutes);
 app.use(vehicleRoutes);
 app.use(routeRoutes);
+app.use(requestRoutes);
 
 app.use((err, req, res, next) => {
     console.log(err);

@@ -16,7 +16,7 @@ exports.post = (req, res, next) => {
     const plate_number = req.body.plate_number;
     const picture = app_url + req.file.path.replace(/\\/g, '/');
 
-    const vehicle = new Vehicle(model, plate_number, picture, null, Date.now());
+    const vehicle = new Vehicle(model, plate_number, picture, Date.now(), Date.now());
 
     vehicle.save()
     .then(({ op }) => {
