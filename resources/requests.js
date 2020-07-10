@@ -28,7 +28,7 @@ exports.post = (req, res, next) => {
             throw error;
         }
 
-        if(request && !request.pending) {
+        if(request && !request.pending && request.approved) {
             const error = new Error('driver has an active request/trip');
             error.statusCode = 403;
             throw error;

@@ -16,6 +16,12 @@ class Route
         return db.collection('routes').insertOne(this);
     }
 
+    static update(id, name, description)
+    {
+        const db = getDB();
+        return db.collection('routes').updateOne({ _id:new ObjectID(id) }, { $set:{ name:name, description:description} });
+    }
+
     static findByID(id)
     {
         const db = getDB();

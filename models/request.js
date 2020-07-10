@@ -29,8 +29,21 @@ class Request
     static checkActiveDriver(userId)
     {
         const db = getDB();
-        return db.collection('requests').findOne({ $and:[{ 'user._id':new ObjectID(userId) },
+        return db.collection('requests').findOne({ $and:[{ 'user._id':new ObjectID(userId) }, 
         { $or:[{ pending:true }, { expires_at:{ $gte:Date.now() } }] }] })
+    }
+
+    static checkActiveRoute(routeId)
+    {
+        const db = getDB();
+        return db.collection('requests').findOne({ $and:[{ 'route._id':new ObjectID(routeId) },
+        { $or:[{ pending:true }, { expires_at:{ $gte:Date.now() } }] }] })
+    }
+
+    static updateRoute(routeId, name)
+    {
+        const db = getDB();
+        return db.collection('requests').updateMany({ 'route._id':new ObjectID(routeId) }, { $set:{ 'route.name':name } });
     }
 
     static setApprovedState(id, approved)
