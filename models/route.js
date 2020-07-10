@@ -1,7 +1,8 @@
 const getDB = require('../utils/database').getDB;
 const ObjectID = require('mongodb').ObjectID;
 
-class Route {
+class Route
+{
     constructor(name, description, trips, created_at) {
         this.name = name;
         this.description = description;
@@ -9,22 +10,32 @@ class Route {
         this.created_at = created_at;
     }
 
-    save() {
+    save()
+    {
         const db = getDB();
         return db.collection('routes').insertOne(this);
     }
 
-    static findByID(id) {
+    static findByID(id)
+    {
         const db = getDB();
         return db.collection('routes').findOne({ _id:new ObjectID(id) });
     }
 
-    static get() {
+    static findByName(name)
+    {
+        const db = getDB();
+        return db.collection('routes').findOne({ name:name });
+    }
+
+    static get()
+    {
         const db = getDB();
         return db.collection('routes').find().sort({ created_at:-1 }).toArray();
     }
 
-    static updateTrips(id) {
+    static updateTrips(id)
+    {
         const db = getDB();
         return Route.findByID(id)
         .then(route => {

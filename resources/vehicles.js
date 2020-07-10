@@ -16,9 +16,17 @@ exports.post = (req, res, next) => {
     const plate_number = req.body.plate_number;
     const picture = app_url + req.file.path.replace(/\\/g, '/');
 
-    const vehicle = new Vehicle(model, plate_number, picture, Date.now(), Date.now());
+    const new_vehicle = new Vehicle(model, plate_number, picture, Date.now(), Date.now());
 
-    vehicle.save()
+    Vehicle.findByPlateNumber(plate_number)
+    .then(vehicle => {
+        if(vehicle) {
+            const error = new Error('vehicle with plate number exists');
+            error.statusCode = 403;
+            throw error;
+        }
+        return new_vehicle.save();
+    })
     .then(({ op }) => {
         res.status(201).json({
             data:{

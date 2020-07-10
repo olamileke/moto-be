@@ -2,8 +2,8 @@ const { ObjectID } = require('mongodb');
 
 const getDB = require('../utils/database').getDB;
 
-class Request {
-    
+class Request
+{
     constructor(user, vehicle, route, approved, pending , expires_at, created_at) {
         this.user = user;
         this.vehicle = vehicle;
@@ -14,22 +14,26 @@ class Request {
         this.created_at = created_at;
     }
 
-    save() {
+    save()
+    {
         const db = getDB();
         return db.collection('requests').insertOne(this);
     }
 
-    static findByID(id) {
+    static findByID(id)
+    {
         const db = getDB();
         return db.collection('requests').findOne({ _id:new ObjectID(id) });
     }
 
-    static setApprovedState(id, approved) {
+    static setApprovedState(id, approved)
+    {
         const db = getDB();
         return db.collection('requests').updateOne({ _id:new ObjectID(id) }, { $set:{ approved:approved, pending:false } });
     }
 
-    static get(admin, userId) {
+    static get(admin, userId)
+    {
         const db = getDB();
 
         if(admin) {

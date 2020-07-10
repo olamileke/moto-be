@@ -110,7 +110,7 @@ exports.patch = (req, res, next) => {
         if(!request) {
             const error = Error('invalid vehicle request');
             error.statusCode = 404;
-            throw error;
+            throw error; 
         }
 
         patchedRequest = request;
@@ -123,19 +123,22 @@ exports.patch = (req, res, next) => {
         return Vehicle.setPending(patchedRequest.vehicle._id, false);
     })
     .then(() => {
-        return Vehicle.setReservedTill(patchedRequest.vehicle_id, patchedRequest.expires_at);
-    })
+        if(approved) {
+            return Vehicle.setReservedTill(patchedRequest.vehicle._id, patchedRequest.expires_at);
+        }
+        return;
+    }) 
     .then(() => {
         if(approved) {
             return Route.updateTrips(patchedRequest.route._id);
         }
-        return new Promise();
+        return;
     })
     .then(() => {
         if(approved) {
             return User.setBusyTime(patchedRequest.user._id, patchedRequest.expires_at);
         }
-        return new Promise();
+        return;
     })
     .then(() => {
         res.status(200).json({

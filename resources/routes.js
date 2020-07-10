@@ -11,12 +11,21 @@ exports.post = (req, res, next) => {
         throw err;
     }
 
-    const name = req.body.name;
-    const description = req.body.description;
+    const name = req.body.name.toLowerCase();
+    const description = req.body.description.toLowerCase(); 
 
-    const route = new Route(name, description, 0, Date.now());
+    const new_route = new Route(name, description, 0, Date.now());
 
-    route.save()
+    Route.findByName(name)
+    .then(route => {
+        if(route) {
+            const error = new Error(`${name} route exists already`);
+            error.statusCode = 403;
+            throw error;
+        }
+
+        return new_route.save();
+    })
     .then(({ op }) => {
         res.status(201).json({
             data:{
