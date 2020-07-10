@@ -17,7 +17,16 @@ exports.put = (req, res, next) => {
     const description = req.body.description;
     let updatedRoute;
 
-    Request.checkActiveRoute(routeID)
+    return Route.findByID(routeID)
+    .then(route => {
+        if(!route) {
+            const error = new Error('route does not exist');
+            error.statusCode = 404;
+            throw error;
+        }
+
+        return Request.checkActiveRoute(routeID)
+    })
     .then(request => {
         if(request && request.pending) {
             const error = new Error('there is a pending vehicle request for this route');
@@ -33,8 +42,8 @@ exports.put = (req, res, next) => {
 
         return Route.update(routeID, name, description)
     })
-    .then(({ op }) => {
-        updatedRoute = op;
+    .then(route => {
+        updatedRoute = route;
         return Request.updateRoute(routeID, name);
     })
     .then(() => {

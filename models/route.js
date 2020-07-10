@@ -19,7 +19,10 @@ class Route
     static update(id, name, description)
     {
         const db = getDB();
-        return db.collection('routes').updateOne({ _id:new ObjectID(id) }, { $set:{ name:name, description:description} });
+        return db.collection('routes').updateOne({ _id:new ObjectID(id) }, { $set:{ name:name, description:description} })
+        .then(() => {
+            return Route.findByID(id);
+        })
     }
 
     static findByID(id)

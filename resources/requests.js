@@ -45,6 +45,9 @@ exports.post = (req, res, next) => {
 
         delete vehicle.requests;
         delete vehicle.created_at;
+        delete vehicle.pending;
+        delete vehicle.reserved_till;
+        delete vehicle.trips;
         requested_vehicle = vehicle;
         return Route.findByID(routeID)
     })
@@ -57,6 +60,7 @@ exports.post = (req, res, next) => {
 
         delete route.description;
         delete route.created_at;
+        delete route.trips;
         requested_route = route;
 
         const expires_at = Date.now() + (days * 24 * 60 * 60 * 1000);
@@ -123,7 +127,7 @@ exports.patch = (req, res, next) => {
     Request.findByID(requestID)
     .then(request => {
         if(!request) {
-            const error = Error('invalid vehicle request');
+            const error = Error('invalid request');
             error.statusCode = 404;
             throw error; 
         }
@@ -131,12 +135,11 @@ exports.patch = (req, res, next) => {
         patchedRequest = request;
         return;
     })
-    .then(() =>
-     {
+    .then(() => {
         return Request.setApprovedState(requestID, approved);
     })
     .then(() => {
-        return Vehicle.setPending(patchedRequest.vehicle._id, false);
+        return Vehicle.updateTrips(patchedRequest.vehicle._id, false);
     })
     .then(() => {
         if(approved) {

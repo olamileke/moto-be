@@ -40,10 +40,23 @@ class Request
         { $or:[{ pending:true }, { expires_at:{ $gte:Date.now() } }] }] })
     }
 
+    static checkActiveVehicle(vehicleID)
+    {
+        const db = getDB();
+        return db.collection('requests').findOne({ $and:[{ 'vehicle._id':new ObjectID(vehicleID) },
+        { $or:[{ pending:false }, { expires_at:{ $gte:Date.now() } }] }] })
+    }
+
     static updateRoute(routeId, name)
     {
         const db = getDB();
         return db.collection('requests').updateMany({ 'route._id':new ObjectID(routeId) }, { $set:{ 'route.name':name } });
+    }
+
+    static updateVehicle(vehicle)
+    {
+        const db = getDB();
+        return db.collection('requests').updateMany({ 'vehicle._id':new ObjectID(vehicle._id) }, { $set:vehicle });
     }
 
     static setApprovedState(id, approved)

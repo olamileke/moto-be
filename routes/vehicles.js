@@ -5,6 +5,7 @@ const authenticate = require('../middlewares/authenticate');
 const admin = require('../middlewares/admin');
 const authorize = require('../middlewares/authorize');
 const vehicles = require('../resources/vehicles');
+const vehicle = require('../resources/vehicle');
 const multer = require('../middlewares/multer');
 
 router.post('/vehicles', authenticate, admin, multer , [ body('model').isLength({ min:6 }),
@@ -15,8 +16,11 @@ router.post('/vehicles', authenticate, admin, multer , [ body('model').isLength(
 
                                return true;
                            }),
-                           body('plate_number').isLength({ min:7 }), vehicles.post ])
+                           body('plate_number').isLength({ min:9 }), vehicles.post ])
                            
 router.get('/vehicles', authenticate, authorize, vehicles.get);
+
+router.put('/vehicles/:vehicleID', authenticate, admin, multer, [ body('model').isLength({ min:6 }),
+                                    body('plate_number').isLength({ min:9 }) ], vehicle.put)
 
 module.exports = router;
