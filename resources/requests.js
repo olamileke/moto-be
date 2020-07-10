@@ -16,11 +16,26 @@ exports.post = (req, res, next) => {
 
     const routeID = req.body.routeID;
     const vehicleID = req.body.vehicleID;
-    const days = req.body.days;
+    const days = req.body.days; 
     const user = { _id:req.user._id, name:req.user.name, avatar:req.user.avatar };
     let requested_vehicle, requested_route, saved_request;
 
-    Vehicle.findByID(vehicleID)
+    Request.checkActiveDriver(req.user._id)
+    .then(request => {
+        if(request && request.pending) {
+            const error = new Error('driver has a pending request');
+            error.statusCode = 403;
+            throw error;
+        }
+
+        if(request && !request.pending) {
+            const error = new Error('driver has an active request/trip');
+            error.statusCode = 403;
+            throw error;
+        }
+
+        return Vehicle.findByID(vehicleID);
+    })
     .then(vehicle => {
         if(!vehicle) {
             const error = new Error('vehicle does not exist');
@@ -116,7 +131,8 @@ exports.patch = (req, res, next) => {
         patchedRequest = request;
         return;
     })
-    .then(() => {
+    .then(() =>
+     {
         return Request.setApprovedState(requestID, approved);
     })
     .then(() => {

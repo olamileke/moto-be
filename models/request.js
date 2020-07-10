@@ -26,6 +26,13 @@ class Request
         return db.collection('requests').findOne({ _id:new ObjectID(id) });
     }
 
+    static checkActiveDriver(userId)
+    {
+        const db = getDB();
+        return db.collection('requests').findOne({ $and:[{ 'user._id':new ObjectID(userId) },
+        { $or:[{ pending:true }, { expires_at:{ $gte:Date.now() } }] }] })
+    }
+
     static setApprovedState(id, approved)
     {
         const db = getDB();
