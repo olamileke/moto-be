@@ -53,6 +53,12 @@ class Request
         return db.collection('requests').updateMany({ 'route._id':new ObjectID(routeId) }, { $set:{ 'route.name':name } });
     }
 
+    static updateUser(userId, avatar)
+    {
+        const db = getDB();
+        return db.collection('requests').updateMany({ 'user._id':new ObjectID(userId) }, { $set:{ 'user.avatar':avatar } })
+    }
+
     static updateVehicle(vehicle)
     {
         const db = getDB();

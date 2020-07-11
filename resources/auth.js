@@ -16,7 +16,7 @@ exports.post = (req, res, next) => {
 
     const email = req.body.email.toLowerCase();
     const password = req.body.password;
-    let authenticated_user;
+    let auth_user;
 
     User.findByEmail(email)
     .then(user => {
@@ -26,22 +26,22 @@ exports.post = (req, res, next) => {
             throw error;
         }
         
-        authenticated_user = user;
+        auth_user = user;
         return bcrypt.compare(password, user.password)
     })
     .then(isEqual => {
-        if(!isEqual) {
+        if(!isEqual) { 
             const error = new Error('incorrect username or password');
             error.statusCode = 404;
             throw error;
         }
 
-        const token = jwt.sign({ userId:authenticated_user._id }, secret, { expiresIn:'14d' });
+        const token = jwt.sign({ userId:auth_user._id }, secret, { expiresIn:'14d' });
+        const user = { name:auth_user.name, email:auth_user.email, admin:auth_user.admin, avatar:auth_user.avatar }
 
         res.status(200).json({
             data:{
-                user:{ name:authenticated_user.name, email:authenticated_user.email, 
-                admin:authenticated_user.admin, avatar:authenticated_user.avatar },
+                user:user,
                 token:token
             }
         })

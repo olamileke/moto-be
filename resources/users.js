@@ -1,4 +1,5 @@
 const User = require('../models/user');
+const Request = require('../models/request');
 const { validationResult } = require('express-validator');
 const bcrypt = require('bcryptjs');
 const app_url = require('../utils/config').app_url;
@@ -37,13 +38,8 @@ exports.post = (req, res, next) => {
         const user = new User(name, email, hashedPassword, admin, avatar, null, 0, Date.now(), Date.now());
         return user.save();
     })
-    .then(({ ops }) => {
-        delete ops._id;
-        delete ops.activation_token;
-        delete ops.password;
-
-        const new_user = ops;
-
+    .then(() => {
+        const new_user = { name:name, email:email, admin:admin, avatar:avatar };
         res.status(201).json({
             data:{
                 user:new_user
@@ -85,52 +81,44 @@ exports.get = (req, res, next) => {
 }
 
 exports.patch = (req, res, next) => {
-    res.json({
-        leke:'user'
-    })
-    // const field = req.query.field;
-    // const allowedFields = ['avatar'];
-    // console.log(req.query.field);
+    const fields = ['avatar', 'password'];
+    const field = req.query.field;
+    let newAvatar;
 
-    // if(!allowedFields.includes(field)) {
-    //     const error = new Error('unknown field to patch');
-    //     error.statusCode = 400;
-    //     throw error;
-    // }
+    if(!fields.includes(field)) {
+        const error = new Error('unknown field to patch');
+        error.statusCode = 400;
+        throw error;
+    }
 
-    // const old_avatar = req.user.avatar;
-    // const generic_avatar = app_url + 'images/users/anon.png';
-    // const new_avatar = app_url + req.file.path.replace(/\\/g, '/');
-    // const old_path = path.join(app_root, 'images', 'users', old_avatar.split('images/users/')[1]);
+    if(field == 'avatar') {
+        if(!req.file) {
+            const error = new Error('image is required');
+            error.statusCode = 422;
+            throw error;
+        }
 
-    // User.changeAvatar(req.user._id, new_avatar)
-    // .then(({ op }) => {
-    //     if(old_avatar != generic_avatar) {
-    //         file.delete(old_path)
-    //     }
-
-    //     delete ops._id;
-    //     delete ops.activation_token;
-    //     delete ops.password;
-
-    //     return ops;
-    // })
-    // .then(updated_user => {
-    //     res.status(200).json({
-    //         data:{
-    //             user:updated_user
-    //         }
-    //     })
-    // })
-    // .catch(err => {
-    //     if(!err.statusCode) {
-    //         err.statusCode = 500;
-    //     }
-
-    //     next(err);
-    // })
-}
-
-async function changeAvatar(req, res, next)  {
-    
+        const oldAvatar = app_url + 'images/users/anon.png';
+        req.user.avatar != oldAvatar ? file.delete(req.user.avatar) : '';
+        newAvatar = app_url + req.file.path.replace(/\\/g, '/');
+        
+        User.changeAvatar(req.user._id, newAvatar)
+        .then(() => {
+            return Request.updateUser(req.user._id, newAvatar);
+        })
+        .then(() => {
+            const patchedUser = { name:req.user.name, email:req.user.email, admin:req.user.admin, avatar:newAvatar };
+            res.status(200).json({
+                data:{
+                    user:patchedUser
+                }
+            })
+        })
+        .catch(err => {
+            if(!err.statusCode) {
+                err.statusCode = 500;
+            }
+            next(err);
+        })
+    }
 }

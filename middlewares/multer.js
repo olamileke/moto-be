@@ -8,6 +8,10 @@ const fileStorage = multer_package.diskStorage({
         if(url.includes('vehicles')) {
             cb(null, path.join('images', 'vehicles'))
         }
+
+        if(url.includes('users')) {
+            cb(null, path.join('images', 'users'))
+        }
     },
     filename: (req, file, cb) => {
         cb(null, new Date().toISOString().replace(/:/g, '-') + '-' + file.originalname);
