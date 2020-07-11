@@ -1,5 +1,6 @@
 const Route = require('../models/route');
 const { validationResult } = require('express-validator');
+const per_page = require('../utils/config').per_page;
 
 exports.post = (req, res, next) => {
     const errors = validationResult(req);
@@ -44,19 +45,46 @@ exports.post = (req, res, next) => {
 
 exports.get = (req, res, next) => {
 
-    Route.get()
-    .then(routes => {
-        res.status(200).json({
-            data:{
-                routes:routes
-            }
-        })
-    })
-    .catch(err => {
-        if(!err.statusCode) {
-            err.statusCode = 500;
-        }
+    let page, total;
+    req.query.page ? page = req.query.page : page = 1;
+    const skip = (page - 1) * per_page;
 
-        next(err);
-    })
+    if(req.query.all == 'true') {
+        Route.all()
+        .then(routes => {
+            res.status(200).json({
+                data:{
+                    routes:routes
+                }
+            })
+        })
+        .catch(err => {
+            if(!err.statusCode) {
+                err.statusCode = 500;
+            }
+            next(err);
+        })
+    } 
+    else {
+        Route.count()
+        .then(count => {
+            total = count;
+            return Route.get(skip, per_page);
+        })
+        .then(routes => {
+            res.status(200).json({
+                data:{
+                    routes:routes,
+                    total:total
+                }
+            })
+        })
+        .catch(err => {
+            if(!err.statusCode) {
+                err.statusCode = 500;
+            }
+
+            next(err);
+        })
+    }
 }

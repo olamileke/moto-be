@@ -65,15 +65,26 @@ class Request
         return db.collection('requests').updateOne({ _id:new ObjectID(id) }, { $set:{ approved:approved, pending:false } });
     }
 
-    static get(admin, userId)
+    static count(admin, userId) 
     {
         const db = getDB();
 
         if(admin) {
-            return db.collection('requests').find().sort({ created_at:-1 }).toArray();
+            return db.collection('requests').find().count();
         }
 
-        return db.collection('requests').find({ 'user._id':new ObjectID(userId) }).sort({ created_at:-1 }).toArray();
+        return db.collection('requests').find({ 'user._id':new ObjectID(userId) }).count();
+    }
+
+    static get(admin, userId, skip, limit)
+    {
+        const db = getDB();
+
+        if(admin) {
+            return db.collection('requests').find().sort({ created_at:-1 }).skip(skip).limit(limit).toArray();
+        }
+
+        return db.collection('requests').find({ 'user._id':new ObjectID(userId) }).sort({ created_at:-1 }).skip(skip).limit(limit).toArray();
     }
 }
 

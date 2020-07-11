@@ -13,8 +13,8 @@ exports.put = (req, res, next) => {
     }
 
     const routeID = req.params.routeID;
-    const name = req.body.name;
-    const description = req.body.description;
+    const name = req.body.name.toLowerCase();
+    const description = req.body.description.toLowerCase();
     let updatedRoute;
 
     return Route.findByID(routeID)

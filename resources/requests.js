@@ -3,6 +3,7 @@ const Vehicle = require('../models/vehicle');
 const { validationResult } = require('express-validator');
 const Route = require('../models/route');
 const User = require('../models/user');
+const per_page = require('../utils/config').per_page;
 
 exports.post = (req, res, next) => {
     const errors = validationResult(req);
@@ -70,7 +71,7 @@ exports.post = (req, res, next) => {
     .then(({ op }) => {
         saved_request = op;
         
-        return Vehicle.setPending(vehicleID, true)
+        return Vehicle.requestUpdate(vehicleID, true)
     })
     .then(() => {
         res.status(201).json({
@@ -89,15 +90,22 @@ exports.post = (req, res, next) => {
 }
 
 exports.get = (req, res, next) => {
-    let admin;
-    
+    let admin, page, total;
     req.query.admin == 'true' ? admin = true : admin = false;
+    req.query.page ? page = req.query.page : page = 1;
 
-    Request.get(admin, req.user._id)
+    const skip = (page - 1) * per_page;
+
+    Request.count(admin, req.user._id)
+    .then(count => {
+        total = count;
+        return Request.get(admin, req.user._id, skip, per_page);
+    })
     .then(requests => {
         res.status(200).json({
             data:{
-                requests:requests
+                requests:requests,
+                total:total
             }
         })
     })
@@ -135,27 +143,22 @@ exports.patch = (req, res, next) => {
         patchedRequest = request;
         return;
     })
-    .then(() => {
+    .then(() => { 
         return Request.setApprovedState(requestID, approved);
     })
     .then(() => {
-        return Vehicle.updateTrips(patchedRequest.vehicle._id, false);
+        return Vehicle.requestUpdate(patchedRequest.vehicle._id, false, patchedRequest.expires_at, true);
     })
     .then(() => {
         if(approved) {
-            return Vehicle.setReservedTill(patchedRequest.vehicle._id, patchedRequest.expires_at);
-        }
-        return;
-    }) 
-    .then(() => {
-        if(approved) {
-            return Route.updateTrips(patchedRequest.route._id);
-        }
+            return Route.updateTrips(patchedRequest.route._id); 
+        } 
         return;
     })
     .then(() => {
         if(approved) {
-            return User.setBusyTime(patchedRequest.user._id, patchedRequest.expires_at);
+            console.log(req.user);
+            return User.requestUpdate(patchedRequest.user._id, patchedRequest.expires_at, Number(req.user.trips) + 1);
         }
         return;
     })

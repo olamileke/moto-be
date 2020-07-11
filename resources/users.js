@@ -34,7 +34,7 @@ exports.post = (req, res, next) => {
         return bcrypt.hash(password, 12);
     })
     .then(hashedPassword => {
-        const user = new User(name, email, hashedPassword, admin, avatar, null, null, Date.now());
+        const user = new User(name, email, hashedPassword, admin, avatar, null, 0, Date.now(), Date.now());
         return user.save();
     })
     .then(({ ops }) => {

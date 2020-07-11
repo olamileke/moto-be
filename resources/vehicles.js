@@ -1,6 +1,7 @@
 const Vehicle = require('../models/vehicle');
 const { validationResult } = require('express-validator');
 const app_url = require('../utils/config').app_url;
+const per_page = require('../utils/config').per_page;
 
 exports.post = (req, res, next) => {
 
@@ -12,8 +13,8 @@ exports.post = (req, res, next) => {
         throw error;
     }
 
-    const model = req.body.model;
-    const plate_number = req.body.plate_number;
+    const model = req.body.model.toLowerCase();
+    const plate_number = req.body.plate_number.toLowerCase();
     const picture = app_url + req.file.path.replace(/\\/g, '/');
 
     const new_vehicle = new Vehicle(model, plate_number, picture, 0, false, Date.now(), Date.now());
@@ -44,14 +45,21 @@ exports.post = (req, res, next) => {
 }
 
 exports.get = (req, res, next) => {
-    let admin;
+    let admin, page, total;
     req.query.admin == 'true' ? admin = true : admin = false;
+    req.query.page ? page = req.query.page : page = 1;
+    const skip = (page - 1) * per_page;
 
-    Vehicle.get(admin) 
+    Vehicle.count(admin)
+    .then(count => {
+        total = count;
+        return Vehicle.get(admin, skip, per_page)
+    })
     .then(vehicles => { 
         res.status(200).json({
             data:{
-                vehicles:vehicles
+                vehicles:vehicles,
+                total:total
             }
         })
     })

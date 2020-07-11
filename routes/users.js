@@ -18,7 +18,7 @@ router.post('/users', [ body('name')
                   return true;
               }, 
               body('email').isEmail(),
-              body('password').isLength({ min:8 })) ], users.post);  
+              body('password').isLength({ min:8 })) ], users.post);   
 
 router.get('/users', authenticate, admin, users.get);
 

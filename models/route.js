@@ -37,10 +37,22 @@ class Route
         return db.collection('routes').findOne({ name:name });
     }
 
-    static get()
+    static all()
     {
         const db = getDB();
-        return db.collection('routes').find().sort({ created_at:-1 }).toArray();
+        return db.collection('routes').find().toArray();
+    }
+
+    static count() 
+    {
+        const db = getDB();
+        return db.collection('routes').find().count();
+    }
+
+    static get(skip, limit)
+    {
+        const db = getDB();
+        return db.collection('routes').find().sort({ created_at:-1 }).skip(skip).limit(limit).toArray();
     }
 
     static updateTrips(id)

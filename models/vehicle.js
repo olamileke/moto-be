@@ -21,6 +21,16 @@ class Vehicle
         return db.collection('vehicles').insertOne(this);
     }
 
+    static count(admin)
+    {
+        const db = getDB();
+        if(admin) {
+            return db.collection('vehicles').find().count();
+        }
+
+        return db.collection('vehicles').find({ $and:[{ pending:false }, { reserved_till:{ $lt:Date.now() } }] }).count();
+    }
+
     static update(id, model, plate_number, picture=null) 
     {
         const db = getDB();
@@ -48,36 +58,43 @@ class Vehicle
         return db.collection('vehicles').findOne({ plate_number:plate_number })
     }
 
-    static setPending(id, pending)
+    static requestUpdate(id, pending, dateStamp=null, trips=null)
     {
         const db = getDB();
-        return db.collection('vehicles').updateOne({ _id:new ObjectID(id) }, { $set:{ pending:pending } });
+        let updatedVehicle;
+        if(!dateStamp && !trips) {
+            return db.collection('vehicles').updateOne({ _id:new ObjectID(id) }, { $set:{ pending:pending } });
+        }
+
+        return Vehicle.findByID(id)
+        .then(vehicle => {
+            updatedVehicle = vehicle;
+        })
+        .then(() => {
+            return db.collection('vehicles').updateOne({ _id:new ObjectID(id) },
+            { $set:{ pending:pending, reserved_till:dateStamp, trips:updatedVehicle.trips + 1 } });
+        })
     }
 
     static updateTrips(id, pending)
     {
         return Vehicle.setPending(id, pending)
-        .then(({ op }) => {
+        .then(({ op }) => { 
             const trips = op.trips + 1;
             return db.collection('vehicles').updateOne({ _id:new ObjectID(id) }, { $set:{ trips:trips } });
         })
     }
 
-    static setReservedTill(id, dateStamp)
-    {
-        const db = getDB();
-        return db.collection('vehicles').updateOne({ _id:new ObjectID(id) }, { $set:{ reserved_till:dateStamp } });
-    }
-
-    static get(admin)
+    static get(admin, skip, limit)
     {
         const db = getDB();
 
         if(admin) {
-            return db.collection('vehicles').find().sort({ created_at:-1 }).toArray();
+            return db.collection('vehicles').find().sort({ created_at:-1 }).skip(skip).limit(limit).toArray();
         }
 
-        return db.collection('vehicles').find({ $and:[{ pending:false }, { reserved_till:{ $lt:Date.now() } }] }).sort({ created_at:-1 }).toArray();
+        return db.collection('vehicles').find({ $and:[{ pending:false }, { reserved_till:{ $lt:Date.now() } }] })
+        .sort({ created_at:-1 }).skip(skip).limit(limit).toArray();
     }
 }
 

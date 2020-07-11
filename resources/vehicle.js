@@ -14,8 +14,8 @@ exports.put = (req, res, next) => {
     }
 
     const vehicleID = req.params.vehicleID;
-    const model = req.body.model;
-    const plate_number = req.body.plate_number;
+    const model = req.body.model.toLowerCase();
+    const plate_number = req.body.plate_number.toLowerCase();
     let oldVehicle, updatedVehicle, picture;
     req.file.path ? picture = app_url + req.file.path.replace(/\\/g, '/') : '';
 
