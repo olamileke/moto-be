@@ -27,14 +27,14 @@ exports.put = (req, res, next) => {
 
         return Request.checkActiveRoute(routeID)
     })
-    .then(request => {
-        if(request && request.pending) {
+    .then(requests => {
+        if(requests[0] && requests[0].pending) {
             const error = new Error('there is a pending vehicle request for this route');
             error.statusCode = 403;
             throw error;
         }
 
-        if(request && !request.pending && request.approved) {
+        if(requests[0] && !requests[0].pending && requests[0].approved) {
             const error = new Error('a driver is plying this route currently');
             error.statusCode = 403;
             throw error;

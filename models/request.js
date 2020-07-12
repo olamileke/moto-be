@@ -29,22 +29,22 @@ class Request
     static checkActiveDriver(userId)
     {
         const db = getDB();
-        return db.collection('requests').findOne({ $and:[{ 'user._id':new ObjectID(userId) }, 
-        { $or:[{ pending:true }, { expires_at:{ $gte:Date.now() } }] }] })
+        return db.collection('requests').find({ $and:[{ 'user._id':new ObjectID(userId) }, 
+        { $or:[{ pending:true }, { expires_at:{ $gte:Date.now() } }] }] }).sort({ created_at:-1 }).limit(1).toArray();
     }
 
     static checkActiveRoute(routeId)
     {
         const db = getDB();
-        return db.collection('requests').findOne({ $and:[{ 'route._id':new ObjectID(routeId) },
-        { $or:[{ pending:true }, { expires_at:{ $gte:Date.now() } }] }] })
+        return db.collection('requests').find({ $and:[{ 'route._id':new ObjectID(routeId) }, 
+        { $or:[{ pending:true }, { expires_at:{ $gte:Date.now() } }] }] }).sort({ created_at:-1 }).limit(1).toArray();
     }
 
     static checkActiveVehicle(vehicleID)
     {
         const db = getDB();
-        return db.collection('requests').findOne({ $and:[{ 'vehicle._id':new ObjectID(vehicleID) },
-        { $or:[{ pending:false }, { expires_at:{ $gte:Date.now() } }] }] })
+        return db.collection('requests').find({ $and:[{ 'vehicle._id':new ObjectID(vehicleID) },
+        { $or:[{ pending:false }, { expires_at:{ $gte:Date.now() } }] }] }).sort({ created_at:-1 }).limit(1).toArray();
     }
 
     static updateRoute(routeId, name)

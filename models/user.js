@@ -20,8 +20,13 @@ class User
     save()
     {
         const db = getDB();
-
         return db.collection('users').insertOne(this);
+    }
+
+    static count()
+    {
+        const db = getDB();
+        return db.collection('users').find({ admin:false }).count();
     }
 
     static findByID(id)
@@ -42,10 +47,10 @@ class User
         return db.collection('users').updateOne({ _id:new ObjectID(id) }, { $set:{ avatar:path } })
     }
 
-    static get()
+    static get(skip, limit)
     {
         const db = getDB();
-        return db.collection('users').find({ admin:false }).sort({ created_at:-1 }).toArray()
+        return db.collection('users').find({ admin:false }).sort({ created_at:-1 }).skip(skip).limit(limit).toArray()
     }
 
     static requestUpdate(id, dateStamp, trips)

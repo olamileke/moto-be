@@ -22,14 +22,14 @@ exports.post = (req, res, next) => {
     let requested_vehicle, requested_route, saved_request;
 
     Request.checkActiveDriver(req.user._id)
-    .then(request => {
-        if(request && request.pending) {
+    .then(requests => {
+        if(requests[0] && requests[0].pending) {
             const error = new Error('driver has a pending request');
             error.statusCode = 403;
             throw error;
         }
 
-        if(request && !request.pending && request.approved) {
+        if(requests[0] && !requests[0].pending && requests[0].approved) {
             const error = new Error('driver has an active request/trip');
             error.statusCode = 403;
             throw error;
@@ -67,7 +67,7 @@ exports.post = (req, res, next) => {
         const expires_at = Date.now() + (days * 24 * 60 * 60 * 1000);
         const request = new Request(user, requested_vehicle, requested_route, false, true, expires_at, Date.now());
         return request.save();
-    })
+    }) 
     .then(({ op }) => {
         saved_request = op;
         

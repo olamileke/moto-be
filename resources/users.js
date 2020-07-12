@@ -6,6 +6,7 @@ const app_url = require('../utils/config').app_url;
 const app_root = require('../utils/config').app_root;
 const file = require('../utils/file');
 const path = require('path');
+const per_page = require('../utils/config').per_page;
 
 exports.post = (req, res, next) => {
     const errors = validationResult(req);
@@ -56,8 +57,16 @@ exports.post = (req, res, next) => {
 }
 
 exports.get = (req, res, next) => {
+    let page, total;
     
-    User.get()
+    req.query.page ? page = req.query.page : page = 1;
+    const skip = (Number(page) - 1) * per_page;
+
+    User.count()
+    .then(count => {
+        total = count;
+        return User.get(skip, per_page);
+    })
     .then(users => {
         users.forEach(user => {
             delete user._id;
@@ -67,7 +76,8 @@ exports.get = (req, res, next) => {
 
         res.status(200).json({
             data:{
-                users:users
+                users:users,
+                total:total
             }
         })
     })

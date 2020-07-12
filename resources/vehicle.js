@@ -30,14 +30,14 @@ exports.put = (req, res, next) => {
         oldVehicle = vehicle;
         return Request.checkActiveVehicle(vehicleID)
     })
-    .then(request => {
-        if(request && request.pending) {
+    .then(requests => {
+        if(requests[0] && requests[0].pending) {
             const error = new Error('there is a pending request for this vehicle');
             error.statusCode = 403;
             throw error;
         }
 
-        if(request && !request.pending && request.approved) {
+        if(requests[0] && !requests[0].pending && requests[0].approved) {
             const error = new Error('this vehicle is on an active operation');
             error.statusCode = 403;
             throw error;
