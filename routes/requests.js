@@ -8,7 +8,7 @@ const authorize = require('../middlewares/authorize');
 const admin = require('../middlewares/admin');
 
 router.post('/requests', authenticate, driver, [ body('vehicleID').isLength({ min:24 }),
-body('routeID').isLength({ min:24 }), body('days').isNumeric() ], requests.post);
+body('routeID').isLength({ min:24 }), body('days').isNumeric() ], requests.post); 
 
 router.get('/requests', authenticate, authorize, requests.get)
 

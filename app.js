@@ -7,6 +7,7 @@ const authRoutes = require('./routes/auth');
 const vehicleRoutes = require('./routes/vehicles');
 const routeRoutes = require('./routes/routes');
 const requestRoutes = require('./routes/requests');
+const issueRoutes = require('./routes/issues');
 
 app = express();
 
@@ -25,6 +26,7 @@ app.use(authRoutes);
 app.use(vehicleRoutes);
 app.use(routeRoutes);
 app.use(requestRoutes);
+app.use(issueRoutes);
 
 app.use((err, req, res, next) => {
     console.log(err);

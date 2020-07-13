@@ -90,31 +90,67 @@ exports.post = (req, res, next) => {
 }
 
 exports.get = (req, res, next) => {
-    let admin, page, total;
+    let admin, page, total, active;
     req.query.admin == 'true' ? admin = true : admin = false;
     req.query.page ? page = req.query.page : page = 1;
+    req.query.active == 'true' ? active = true : active = false;
 
     const skip = (page - 1) * per_page;
 
-    Request.count(admin, req.user._id)
-    .then(count => {
-        total = count;
-        return Request.get(admin, req.user._id, skip, per_page);
-    })
-    .then(requests => {
-        res.status(200).json({
-            data:{
-                requests:requests,
-                total:total
-            }
+    if(!active) {
+        Request.count(admin, req.user._id)
+        .then(count => {
+            total = count;
+            return Request.get(admin, req.user._id, skip, per_page);
         })
-    })
-    .catch(err => {
-        if(!err.statusCode) {
-            err.statusCode = 500;
-        }
-        next(err);
-    })
+        .then(requests => {
+            res.status(200).json({
+                data:{
+                    requests:requests,
+                    total:total
+                }
+            })
+        })
+        .catch(err => {
+            if(!err.statusCode) {
+                err.statusCode = 500;
+            }
+            next(err);
+        })
+    }
+    else {
+        Request.checkActiveDriver(req.user._id)
+        .then(requests => {
+            if(requests[0] && requests[0].pending) {
+                res.status(200).json({
+                    data:{
+                        message:'you have a pending request'
+                    }
+                })
+            }
+
+            if(requests[0] && !requests[0].pending && !requests[0].approved) {
+                res.status(200).json({
+                    data:{
+                        message:'you do not have an active request'
+                    }
+                })
+            }
+
+            res.status(200).json({
+                data:{
+                    request:requests[0]
+                }
+            })
+        })
+        .catch(err => {
+            if(!err.statusCode) {
+                err.statusCode = 500;
+            }
+
+            next(err);
+        })
+    }
 }
 
 exports.patch = (req, res, next) => {
