@@ -37,6 +37,11 @@ class Issue {
         return db.collection('issues').find({ 'user._id':new ObjectID(userId) }).count();
     }
 
+    static updateVehicle(vehicle) {
+        const db = getDB();
+        return db.collection('issues').updateMany({ 'vehicle._id':new ObjectID(vehicle._id) }, { $set:{ vehicle:vehicle } });
+    }
+
     static get(admin, userId, skip, limit) {
         const db = getDB();
         if(admin) {

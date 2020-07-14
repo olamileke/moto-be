@@ -18,7 +18,7 @@ exports.post = (req, res, next) => {
     const routeID = req.body.routeID;
     const vehicleID = req.body.vehicleID;
     const days = req.body.days; 
-    const user = { _id:req.user._id, name:req.user.name, avatar:req.user.avatar };
+    const user = { _id:req.user._id, name:req.user.name, avatar:req.user.avatar, trips:req.user.trips };
     let requested_vehicle, requested_route, saved_request;
 
     Request.checkActiveDriver(req.user._id)
@@ -193,8 +193,7 @@ exports.patch = (req, res, next) => {
     })
     .then(() => {
         if(approved) {
-            console.log(req.user);
-            return User.requestUpdate(patchedRequest.user._id, patchedRequest.expires_at, Number(req.user.trips) + 1);
+            return User.requestUpdate(patchedRequest.user._id, patchedRequest.expires_at, patchedRequest.user.trips + 1);
         }
         return;
     })

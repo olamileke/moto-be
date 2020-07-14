@@ -62,7 +62,7 @@ class Request
     static updateVehicle(vehicle)
     {
         const db = getDB();
-        return db.collection('requests').updateMany({ 'vehicle._id':new ObjectID(vehicle._id) }, { $set:vehicle });
+        return db.collection('requests').updateMany({ 'vehicle._id':new ObjectID(vehicle._id) }, { $set:{ vehicle:vehicle } }); 
     }
 
     static setApprovedState(id, approved)

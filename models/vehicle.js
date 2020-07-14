@@ -44,7 +44,7 @@ class Vehicle
         .then(() => {
             return Vehicle.findByID(id)
         })
-    }
+    } 
 
     static findByID(id)
     {
