@@ -60,3 +60,32 @@ exports.put = (req, res, next) => {
         next(err);
     })
 }
+
+exports.delete = (req, res, next) => {
+    
+    const routeID = req.params.routeID;
+
+    Route.findByID(routeID)
+    .then(route => {
+        if(!route) {
+            const error = new Error('route does not exist');
+            error.statusCode = 404;
+            throw error;
+        }
+
+        return Route.delete(route._id)
+    })
+    .then(() => {
+        res.status(204).json({
+            data:{
+                message:'route deleted successfully'
+            }
+        })
+    })
+    .catch(err => {
+        if(!err.statusCode) {
+            err.statusCode = 500;
+        }
+        next(err);
+    })
+}

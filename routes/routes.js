@@ -10,6 +10,8 @@ router.post('/routes', authenticate, admin, [ body('name').isLength({ min:6 }), 
 
 router.get('/routes', authenticate, routes.get);
 
-router.put('/routes/:routeID', authenticate, admin, [ body('name').isLength({ min:6 }), body('description').isLength({ min:40 }) ], route.put)
+router.put('/routes/:routeID', authenticate, admin, [ body('name').isLength({ min:6 }), body('description').isLength({ min:40 }) ], route.put);
+
+router.delete('/routes/:routeID', route.delete);
 
 module.exports = router;

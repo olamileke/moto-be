@@ -49,6 +49,12 @@ class Route
         return db.collection('routes').find().count();
     }
 
+    static delete(id)
+    {
+        const db = getDB();
+        return db.collection('routes').deleteOne({ _id:new ObjectID(id) });
+    }
+
     static get(skip, limit)
     {
         const db = getDB();

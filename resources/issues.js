@@ -53,17 +53,18 @@ exports.get = (req, res, next) => {
     let admin, page, total;
     req.query.admin == 'true' ? admin = true : admin = false;
     req.query.page ? page = req.query.page : page = 1;
-    const skip = (Number(page) - 1) * per_page;
+    const skip = (Number(page) - 1) * (per_page + 1);
 
     Issue.count(admin, req.user._id)
     .then(count => {
         total = count;
-        return Issue.get(admin, req.user._id, skip, per_page)
+        return Issue.get(admin, req.user._id, skip, per_page + 1) 
     })
     .then(issues => {
         res.status(200).json({
             data:{
-                issues:issues
+                issues:issues,
+                total:total
             }
         })
     })
