@@ -17,7 +17,7 @@ exports.post = (req, res, next) => {
     const plate_number = req.body.plate_number.toLowerCase();
     const picture = app_url + req.file.path.replace(/\\/g, '/');
 
-    const new_vehicle = new Vehicle(model, plate_number, picture, 0, false, Date.now(), Date.now());
+    const new_vehicle = new Vehicle(model, plate_number, picture, 0, true, false, Date.now(), Date.now());
 
     Vehicle.findByPlateNumber(plate_number)
     .then(vehicle => {

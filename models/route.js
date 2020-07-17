@@ -3,10 +3,11 @@ const ObjectID = require('mongodb').ObjectID;
 
 class Route
 {
-    constructor(name, description, trips, created_at) {
+    constructor(name, description, trips, active, created_at) {
         this.name = name;
         this.description = description;
         this.trips = trips;
+        this.active = active;
         this.created_at = created_at;
     }
 
@@ -25,6 +26,12 @@ class Route
         })
     }
 
+    static setActiveState(id, active)
+    {
+        const db = getDB();
+        return db.collection('routes').updateOne({ _id:new ObjectID(id) }, { $set:{ active:active } });
+    }
+
     static findByID(id)
     {
         const db = getDB();
@@ -37,16 +44,22 @@ class Route
         return db.collection('routes').findOne({ name:name });
     }
 
-    static all()
+    static all(admin)
     {
         const db = getDB();
-        return db.collection('routes').find().toArray();
+        if(admin) {
+            return db.collection('routes').find().sort({ created_at:-1 }).toArray();
+        }
+        return db.collection('routes').find({ active:true }).sort({ created_at:-1 }).toArray();
     }
 
-    static count() 
+    static count(admin) 
     {
         const db = getDB();
-        return db.collection('routes').find().count();
+        if(admin) {
+            return db.collection('routes').find().count();
+        }
+        return db.collection('routes').find({ active:true }).count();
     }
 
     static delete(id)
@@ -55,10 +68,13 @@ class Route
         return db.collection('routes').deleteOne({ _id:new ObjectID(id) });
     }
 
-    static get(skip, limit)
+    static get(admin, skip, limit)
     {
         const db = getDB();
-        return db.collection('routes').find().sort({ created_at:-1 }).skip(skip).limit(limit).toArray();
+        if(admin) {
+            return db.collection('routes').find().sort({ created_at:-1 }).skip(skip).limit(limit).toArray();
+        }
+        return db.collection('routes').find({ active:true }).sort({ created_at:-1 }).skip(skip).limit(limit).toArray();
     }
 
     static updateTrips(id)

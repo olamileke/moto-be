@@ -15,7 +15,7 @@ exports.post = (req, res, next) => {
     const name = req.body.name.toLowerCase();
     const description = req.body.description.toLowerCase(); 
 
-    const new_route = new Route(name, description, 0, Date.now());
+    const new_route = new Route(name, description, 0, true, Date.now());
 
     Route.findByName(name)
     .then(route => {
@@ -27,10 +27,10 @@ exports.post = (req, res, next) => {
 
         return new_route.save();
     })
-    .then(({ op }) => {
+    .then(({ ops }) => {
         res.status(201).json({
             data:{
-                route:op
+                route:ops[0]
             }
         })
     })
@@ -45,12 +45,13 @@ exports.post = (req, res, next) => {
 
 exports.get = (req, res, next) => {
 
-    let page, total;
+    let admin,page, total;
+    req.query.admin == 'true' ? admin = true : admin = false;
     req.query.page ? page = req.query.page : page = 1;
     const skip = (page - 1) * per_page;
 
     if(req.query.all == 'true') {
-        Route.all()
+        Route.all(admin)
         .then(routes => {
             res.status(200).json({
                 data:{
@@ -66,10 +67,10 @@ exports.get = (req, res, next) => {
         })
     } 
     else {
-        Route.count()
+        Route.count(admin)
         .then(count => {
             total = count;
-            return Route.get(skip, per_page);
+            return Route.get(admin, skip, per_page);
         })
         .then(routes => {
             res.status(200).json({

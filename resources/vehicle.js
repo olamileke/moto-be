@@ -31,12 +31,12 @@ exports.put = (req, res, next) => {
         oldVehicle = vehicle;
         return Request.checkActiveVehicle(vehicleID)
     })
-    .then(requests => {
+    .then(requests => { 
         if(requests[0] && requests[0].pending) {
             const error = new Error('there is a pending request for this vehicle');
             error.statusCode = 403;
             throw error;
-        }
+        } 
  
         if(requests[0] && !requests[0].pending && requests[0].approved && requests[0].expires_at >= Date.now()) {
             const error = new Error('this vehicle is on an active operation');
@@ -73,4 +73,52 @@ exports.put = (req, res, next) => {
         next(err);
     })
 
+}
+
+exports.patch = (req, res, next) => {
+
+    const vehicleID = req.params.vehicleID;
+    let active, patchedVehicle;
+    req.query.active == 'true' ? active = true : active = false;
+
+    Vehicle.findByID(vehicleID)
+    .then(vehicle => {
+        if(!vehicle) {
+            const error = new Error('vehicle does not exist');
+            error.statusCode = 404;
+            throw error;
+        }
+
+        patchedVehicle = vehicle;
+        return Request.checkActiveVehicle(vehicleID)
+    })
+    .then(requests => { 
+        if(requests[0] && requests[0].pending) {
+            const error = new Error('there is a pending request for this vehicle');
+            error.statusCode = 403;
+            throw error;
+        } 
+ 
+        if(requests[0] && !requests[0].pending && requests[0].approved && requests[0].expires_at >= Date.now()) {
+            const error = new Error('this vehicle is on an active operation');
+            error.statusCode = 403;
+            throw error;
+        }
+
+        return Vehicle.setActiveState(vehicleID, active)
+    })
+    .then(() => {
+        const vehicle = { ...patchedVehicle, active:active };
+        res.status(200).json({
+            data:{
+                vehicle:vehicle
+            }
+        })
+    })
+    .catch(err => {
+        if(!err.statusCode) {
+            err.statusCode = 500;
+        }
+        next(err);
+    })
 }

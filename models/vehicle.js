@@ -5,11 +5,12 @@ const ObjectID = require('mongodb').ObjectID;
 
 class Vehicle
 {
-    constructor(model, plate_number, picture, trips, pending, reserved_till, created_at) {
+    constructor(model, plate_number, picture, trips, active, pending, reserved_till, created_at) {
         this.model = model;
         this.plate_number = plate_number;
         this.picture = picture;
         this.trips = trips;
+        this.active= active;
         this.pending = pending;
         this.reserved_till = reserved_till;
         this.created_at = created_at;
@@ -28,7 +29,13 @@ class Vehicle
             return db.collection('vehicles').find().count();
         }
 
-        return db.collection('vehicles').find({ $and:[{ pending:false }, { reserved_till:{ $lt:Date.now() } }] }).count();
+        return db.collection('vehicles').find({ $and:[ { active:true }, { pending:false }, { reserved_till:{ $lt:Date.now() } } ] }).count();
+    }
+
+    static setActiveState(id, active)
+    {
+        const db = getDB();
+        return db.collection('vehicles').updateOne({ _id:new ObjectID(id) }, { $set:{ active:active } });
     }
 
     static update(id, model, plate_number, picture=null) 
@@ -93,7 +100,7 @@ class Vehicle
             return db.collection('vehicles').find().sort({ created_at:-1 }).skip(skip).limit(limit).toArray();
         }
 
-        return db.collection('vehicles').find({ $and:[{ pending:false }, { reserved_till:{ $lt:Date.now() } }] })
+        return db.collection('vehicles').find({ $and:[ { active:true }, { pending:false }, { reserved_till:{ $lt:Date.now() } } ] })
         .sort({ created_at:-1 }).skip(skip).limit(limit).toArray();
     }
 }

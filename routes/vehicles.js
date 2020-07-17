@@ -23,4 +23,6 @@ router.get('/vehicles', authenticate, authorize, vehicles.get);
 router.put('/vehicles/:vehicleID', authenticate, admin, multer, [ body('model').isLength({ min:6 }),
                                     body('plate_number').isLength({ min:9 }) ], vehicle.put)
 
+router.patch('/vehicles/:vehicleID', authenticate, admin, vehicle.patch);
+
 module.exports = router;

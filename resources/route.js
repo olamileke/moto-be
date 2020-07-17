@@ -1,6 +1,7 @@
 const Route = require('../models/route');
 const Request = require('../models/request');
 const { validationResult }  = require('express-validator');
+const { request } = require('express');
 
 exports.put = (req, res, next) => {
     const errors = validationResult(req);
@@ -34,7 +35,7 @@ exports.put = (req, res, next) => {
             throw error;
         }
 
-        if(requests[0] && !requests[0].pending && requests[0].approved) {
+        if(requests[0] && !requests[0].pending && requests[0].approved && requests[0].expires_at >= Date.now()) {
             const error = new Error('a driver is plying this route currently');
             error.statusCode = 403;
             throw error;
@@ -61,9 +62,11 @@ exports.put = (req, res, next) => {
     })
 }
 
-exports.delete = (req, res, next) => {
+exports.patch = (req, res, next) => {
     
     const routeID = req.params.routeID;
+    let active, patchedRoute;
+    req.query.active == 'true' ? active = true : active = false;
 
     Route.findByID(routeID)
     .then(route => {
@@ -73,12 +76,29 @@ exports.delete = (req, res, next) => {
             throw error;
         }
 
-        return Route.delete(route._id)
+        patchedRoute = route;
+        return Request.checkActiveRoute(routeID);
+    })
+    .then(requests => {
+        if(requests[0] && requests[0].pending) {
+            const error = new Error('there is a pending vehicle request for this route');
+            error.statusCode = 403;
+            throw error;
+        }
+
+        if(requests[0] && !requests[0].pending && requests[0].approved && requests[0].expires_at >= Date.now()) {
+            const error = new Error('a driver is plying this route currently');
+            error.statusCode = 403;
+            throw error;
+        }
+
+        return Route.setActiveState(routeID, active);
     })
     .then(() => {
-        res.status(204).json({
+        const route = { ...patchedRoute, active:active };
+        res.status(200).json({
             data:{
-                message:'route deleted successfully'
+                route:route
             }
         })
     })
