@@ -22,6 +22,8 @@ router.post('/users', [ body('name')
 
 router.get('/users', authenticate, admin, users.get);
 
-router.patch('/users', authenticate, multer, users.patch);
+router.patch('/users', users.patch)
+
+router.put('/users', authenticate, multer, users.put);
               
 module.exports = router;

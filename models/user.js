@@ -41,6 +41,18 @@ class User
         return db.collection('users').findOne({ email:email })
     }
 
+    static findByActivationToken(token)
+    {
+        const db = getDB();
+        return db.collection('users').findOne({ activation_token:token });
+    }
+
+    static activate(id)
+    {
+        const db = getDB();
+        return db.collection('users').updateOne({ _id:new ObjectID(id) }, { $set:{ activation_token:null } });
+    }
+
     static changeAvatar(id, path)
     {
         const db = getDB();

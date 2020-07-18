@@ -2,7 +2,7 @@ const User = require('../models/user');
 const { validationResult } = require('express-validator');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const secret = require('../utils/config').secret_key;
+const config = require('../utils/config');
 
 exports.post = (req, res, next) => {
     const errors = validationResult(req);
@@ -20,7 +20,7 @@ exports.post = (req, res, next) => {
 
     User.findByEmail(email)
     .then(user => {
-        if(!user) {
+        if(!user || user.activation_token) {
             const error = new Error('incorrect username or password');
             error.statusCode = 404;
             throw error;
@@ -36,7 +36,8 @@ exports.post = (req, res, next) => {
             throw error;
         }
 
-        const token = jwt.sign({ userId:auth_user._id }, secret, { expiresIn:'14d' });
+
+        const token = jwt.sign({ userId:auth_user._id }, config.secret_key, { expiresIn:'14d' });
         const user = { name:auth_user.name, email:auth_user.email, admin:auth_user.admin, avatar:auth_user.avatar }
 
         res.status(200).json({

@@ -20,13 +20,13 @@ module.exports = (req, res, next) => {
     }
     catch {
         const error = new Error('not authenticated');
-        error.statusCode = 441;
+        error.statusCode = 401;
         throw error;
     }
 
     if(!decodedToken) {
         const error = new Error('not authenticated');
-        error.statusCode = 441;
+        error.statusCode = 401;
         throw error;
     }
 
@@ -34,7 +34,7 @@ module.exports = (req, res, next) => {
     .then(user => {
         if(!user) {
             const error = new Error('not authenticated');
-            error.statusCode = 441;
+            error.statusCode = 401;
             throw error;
         }
 
