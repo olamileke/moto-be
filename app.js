@@ -8,6 +8,7 @@ const vehicleRoutes = require('./routes/vehicles');
 const routeRoutes = require('./routes/routes');
 const requestRoutes = require('./routes/requests');
 const issueRoutes = require('./routes/issues');
+const passwordResetRoutes = require('./routes/passwordresets');
 
 app = express();
 
@@ -27,6 +28,7 @@ app.use(vehicleRoutes);
 app.use(routeRoutes);
 app.use(requestRoutes);
 app.use(issueRoutes);
+app.use(passwordResetRoutes);
 
 app.use((err, req, res, next) => {
     console.log(err);

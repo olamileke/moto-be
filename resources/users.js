@@ -1,4 +1,5 @@
 const User = require('../models/user');
+const PasswordReset = require('../models/PasswordReset');
 const Request = require('../models/request');
 const { validationResult } = require('express-validator');
 const bcrypt = require('bcryptjs');
@@ -6,11 +7,9 @@ const file = require('../utils/file');
 const path = require('path');
 const per_page = require('../utils/config').per_page;
 const crypto = require('crypto');
-const ejs = require('ejs');
 const config = require('../utils/config');
-const mailgun = require('mailgun-js')({ apiKey:config.mailgun_api_key, domain:config.mailgun_domain });
 const mail = require('../utils/mail');
-const authenticate = require('../middlewares/authenticate');
+const { changePassword } = require('../models/user');
 
 exports.post = (req, res, next) => {
     const errors = validationResult(req);
@@ -53,7 +52,8 @@ exports.post = (req, res, next) => {
             .then(() => {
                 const new_user = { name:name, email:email, admin:admin, avatar:avatar };
                 const mail_user = { ...new_user, activation_token:activationToken };
-                mail(mail_user, 'Activate your Account', path.join(config.app_root, 'templates', 'activate.html'), next);
+                const data = { user:mail_user }
+                mail(data, 'Activate your Account', path.join(config.app_root, 'templates', 'activate.html'), next);
                 res.status(201).json({
                     data:{
                         user:new_user
@@ -113,10 +113,15 @@ exports.patch = (req, res, next) => {
         const error = new Error('unknown field to edit');
         error.statusCode = 400;
         throw error;
+        next(error);
     }
 
     if(field == 'activation_token') {
         activate(req, res, next);
+    }
+
+    if(field == 'password') {
+        resetPassword(req, res, next);
     }
 }
 
@@ -153,12 +158,73 @@ exports.put = (req, res, next) => {
     })
 }
 
-async function activate(req, res, next) {
-    const token = req.query.token;
+async function resetPassword(req, res, next) {
+    const password = req.body.password;
+    const token = req.body.token;
+    let updatedUser, resetToUse;
+
+    if(!password || password.length < 8) {
+        const error = new Error('validation failed. password must be at least 8 characters.');
+        error.statusCode = 422;
+        throw error;
+    }
 
     if(!token) {
-        const error = new Error('activation token is required');
-        error.statusCode = 400;
+        const error = new Error('validation failed. reset token is required.');
+        error.statusCode = 422;
+        throw error;
+    }
+
+    PasswordReset.findByToken(token)
+    .then(reset => {
+        if(!reset) {
+            const error = new Error('invalid reset token');
+            error.statusCode = 400;
+            throw error;
+        }
+
+        resetToUse = reset;
+        return User.findByID(reset.userId);
+    })
+    .then(user => {
+        if(!user) {
+            const error = new Error('user does not exist');
+            error.statusCode = 404;
+            throw error;
+        }
+
+        updatedUser = user;
+        return bcrypt.hash(password, 12);
+    })
+    .then(hashedPassword => {
+        return User.changePassword(updatedUser._id, hashedPassword)
+        .then(() => {
+            return PasswordReset.delete(resetToUse._id)
+        })
+    })
+    .then(() => {
+        const user = { name:updatedUser.name, email:updatedUser.email,
+        admin:updatedUser.admin, avatar:updatedUser.avatar };
+        res.status(200).json({
+            data:{
+                user:user
+            }
+        })
+    })
+    .catch(err => {
+        if(!err.statusCode) {
+            err.statusCode = 500;
+        }
+        next(err);
+    })
+}
+
+async function activate(req, res, next) {
+    const token = req.body.token;
+
+    if(!token) {
+        const error = new Error('validation failed.activation token is required');
+        error.statusCode = 422;
         throw error;
     }
 
@@ -172,7 +238,8 @@ async function activate(req, res, next) {
             throw error;
         }
 
-        activatedUser = { name:user.name, email:user.email, admin:user.admin, avatar:user.avatar };
+        activatedUser = { name:user.name, email:user.email,
+         admin:user.admin, avatar:user.avatar };
         return User.activate(user._id);
     })
     .then(() => {

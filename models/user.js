@@ -59,6 +59,12 @@ class User
         return db.collection('users').updateOne({ _id:new ObjectID(id) }, { $set:{ avatar:path } })
     }
 
+    static changePassword(id, password)
+    {
+        const db = getDB();
+        return db.collection('users').updateOne({ _id:new ObjectID(id) }, { $set:{ password:password } });
+    }
+
     static get(skip, limit)
     {
         const db = getDB();
