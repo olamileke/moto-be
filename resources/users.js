@@ -9,7 +9,6 @@ const per_page = require('../utils/config').per_page;
 const crypto = require('crypto');
 const config = require('../utils/config');
 const mail = require('../utils/mail');
-const { changePassword } = require('../models/user');
 
 exports.post = (req, res, next) => {
     const errors = validationResult(req);
@@ -26,7 +25,7 @@ exports.post = (req, res, next) => {
     const password = req.body.password;
     let admin, activationToken;
     req.query.admin == 'true' ? admin = true : admin = false;
-    const avatar = config.app_url + 'images/users/anon.png';
+    const avatar = config.s3_file_link + 'users/anon.png';
 
     User.findByEmail(email)
     .then(user => {
@@ -133,28 +132,28 @@ exports.put = (req, res, next) => {
         throw error;
     }
 
-    let newAvatar;
-    const oldAvatar = config.app_url + 'images/users/anon.png';
-    req.user.avatar != oldAvatar ? file.delete(req.user.avatar) : '';
-    newAvatar = config.app_url + req.file.path.replace(/\\/g, '/');
-    
-    User.changeAvatar(req.user._id, newAvatar)
-    .then(() => {
-        return Request.updateUser(req.user._id, newAvatar);
-    })
-    .then(() => {
-        const patchedUser = { name:req.user.name, email:req.user.email, admin:req.user.admin, avatar:newAvatar };
-        res.status(200).json({
-            data:{
-                user:patchedUser
-            }
+    const defaultAvatar = config.s3_file_link + 'users/anon.png';
+    req.user.avatar != defaultAvatar ? file.delete(req.user.avatar, next) : '';
+
+    file.upload(req, res, next, 'users', avatar => {
+        User.changeAvatar(req.user._id, avatar)
+        .then(() => {
+            return Request.updateUser(req.user._id, avatar);
         })
-    })
-    .catch(err => {
-        if(!err.statusCode) {
-            err.statusCode = 500;
-        }
-        next(err);
+        .then(() => {
+            const patchedUser = { name:req.user.name, email:req.user.email, admin:req.user.admin, avatar:avatar };
+            res.status(200).json({
+                data:{
+                    user:patchedUser
+                }
+            })
+        })
+        .catch(err => {
+            if(!err.statusCode) {
+                err.statusCode = 500;
+            }
+            next(err);
+        })
     })
 }
 

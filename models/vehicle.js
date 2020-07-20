@@ -48,9 +48,6 @@ class Vehicle
             })
         }
         return db.collection('vehicles').updateOne({ _id:new ObjectID(id) }, { $set:{ model:model, plate_number:plate_number, picture:picture } })
-        .then(() => {
-            return Vehicle.findByID(id)
-        })
     } 
 
     static findByID(id)

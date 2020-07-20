@@ -10,7 +10,7 @@ const multer = require('../middlewares/multer');
 
 router.post('/vehicles', authenticate, admin, multer , [ body('model').isLength({ min:6 }),
                            body('image').custom((value, { req }) => {
-                               if(!req.file.path) {
+                               if(!req.file) {
                                    return Promise.reject('image is required'); 
                                }
 

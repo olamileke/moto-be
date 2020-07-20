@@ -1,26 +1,7 @@
 const multer_package = require('multer');
 const path = require('path');
 
-const fileStorage = multer_package.diskStorage({
-    destination: (req, file, cb) => {
-        const url = req.url;
-
-        if(url.includes('vehicles')) {
-            cb(null, path.join('images', 'vehicles'))
-        }
-
-        if(url.includes('users')) {
-            cb(null, path.join('images', 'users'))
-        }
-
-        if(url.includes('issues')) {
-            cb(null, path.join('images', 'issues'))
-        }
-    },
-    filename: (req, file, cb) => {
-        cb(null, new Date().toISOString().replace(/:/g, '-') + '-' + file.originalname);
-    }
-})
+// cb(null, new Date().toISOString().replace(/:/g, '-') + '-' + file.originalname);
 
 const fileFilter = (req, file, cb) => {
     const mimeType = file.mimetype.toLowerCase();
@@ -33,6 +14,7 @@ const fileFilter = (req, file, cb) => {
     return cb(null, true);
 }
 
-const multer = multer_package({ storage:fileStorage, fileFilter:fileFilter }).single('image');
+const storage = multer_package.memoryStorage();
+const multer = multer_package({ storage:storage, fileFilter:fileFilter }).single('image');
 
 module.exports = multer;

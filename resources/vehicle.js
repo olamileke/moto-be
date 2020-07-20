@@ -2,7 +2,6 @@ const Vehicle = require('../models/vehicle');
 const Request = require('../models/request');
 const Issue = require('../models/issue');
 const { validationResult } = require('express-validator');
-const app_url = require('../utils/config').app_url;
 const file = require('../utils/file');
 
 exports.put = (req, res, next) => {
@@ -12,13 +11,13 @@ exports.put = (req, res, next) => {
         const error = new Error('validation failed');
         error.statusCode = 422;
         error.errors = errors;
+        throw error;
     }
 
     const vehicleID = req.params.vehicleID;
     const model = req.body.model.toLowerCase();
     const plate_number = req.body.plate_number.toLowerCase();
-    let oldVehicle, updatedVehicle, requestVehicle, picture;
-    req.file ? picture = app_url + req.file.path.replace(/\\/g, '/') : '';
+    let oldVehicle, updatedVehicle, requestVehicle;
 
     Vehicle.findByID(vehicleID)
     .then(vehicle => {
@@ -44,8 +43,20 @@ exports.put = (req, res, next) => {
             throw error;
         }
 
-        picture ? file.delete(oldVehicle.picture) : '';
-        return Vehicle.update(vehicleID, model, plate_number, picture)
+        if(!req.file) {
+            return Vehicle.update(vehicleID, model, plate_number)
+        }
+        else {
+            return file.delete(oldVehicle.picture, next)
+            .then(() => {
+                return file.upload(req, res, next, 'vehicles', picture => {
+                    Vehicle.update(vehicleID, model, plate_number, picture)
+                })
+                .then(() => {
+                    return Vehicle.findByID(oldVehicle._id)
+                })
+            })
+        }
     })
     .then(vehicle => {
         updatedVehicle = vehicle;

@@ -1,8 +1,9 @@
 const Issue = require('../models/issue');
 const Vehicle = require('../models/vehicle');
 const { validationResult } = require('express-validator');
-const app_url = require('../utils/config').app_url;
 const per_page = require('../utils/config').per_page;
+const file = require('../utils/file');
+
 
 exports.post = (req, res, next) => {
     const errors = validationResult(req);
@@ -18,7 +19,6 @@ exports.post = (req, res, next) => {
     const description = req.body.description;
     const vehicleID = req.body.vehicleID;
     const user = { _id:req.user._id, name:req.user.name, avatar:req.user.avatar };
-    const picture = app_url + req.file.path.replace(/\\/g, '/');
     let issueVehicle;
 
     Vehicle.findByID(vehicleID)
@@ -29,15 +29,19 @@ exports.post = (req, res, next) => {
             throw error;
         }
 
-        issueVehicle = { _id:vehicle._id, model:vehicle.model, plate_number:vehicle.plate_number, picture:vehicle.picture };
-        const issue = new Issue(title, description, user, issueVehicle, picture, null, Date.now())
-        return issue.save();
-    })
-    .then(({ ops }) => {
-        res.status(201).json({
-            data:{
-                issue:ops[0]
-            }
+        file.upload(req, res, next, 'issues', picture => {
+
+            issueVehicle = { _id:vehicle._id, model:vehicle.model, plate_number:vehicle.plate_number, picture:vehicle.picture };
+
+            const issue = new Issue(title, description, user, issueVehicle, picture, null, Date.now())
+            return issue.save()
+            .then(({ ops }) => {
+                res.status(201).json({
+                    data:{
+                        issue:ops[0]
+                    }
+                })
+            })
         })
     })
     .catch(err => {
