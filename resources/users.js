@@ -1,5 +1,6 @@
 const User = require('../models/user');
 const PasswordReset = require('../models/PasswordReset');
+const Issue = require('../models/issue');
 const Request = require('../models/request');
 const { validationResult } = require('express-validator');
 const bcrypt = require('bcryptjs');
@@ -136,9 +137,13 @@ exports.put = (req, res, next) => {
     req.user.avatar != defaultAvatar ? file.delete(req.user.avatar, next) : '';
 
     file.upload(req, res, next, 'users', avatar => {
+
         User.changeAvatar(req.user._id, avatar)
         .then(() => {
-            return Request.updateUser(req.user._id, avatar);
+            return Request.updateUser(req.user._id, avatar)
+            .then(() => {
+                return Issue.updateUser(req.user._id, avatar)
+            })
         })
         .then(() => {
             const patchedUser = { name:req.user.name, email:req.user.email, admin:req.user.admin, avatar:avatar };

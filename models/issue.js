@@ -28,6 +28,11 @@ class Issue {
         return db.collection('issues').updateOne({ _id:new ObjectID(id) }, { $set:{ fixed_at:Date.now() } })
     }
 
+    static updateUser(userId, avatar) {
+        const db = getDB();
+        return db.collection('issues').updateMany({ 'user._id':new ObjectID(userId) }, { $set:{ 'user.avatar':avatar } })
+    }
+
     static count(admin, userId) {
         const db = getDB();
         if(admin) {

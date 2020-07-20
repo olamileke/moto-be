@@ -50,5 +50,5 @@ app.use((err, req, res, next) => {
 })
 
 database.connectToDB(() => {
-    app.listen(1000);
+    app.listen(2000);
 })
