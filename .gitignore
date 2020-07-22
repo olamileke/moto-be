@@ -1,9 +1,0 @@
-
-# node modules
-/node_modules
-
-# configuration
-/utils/config.js
-
-# images
-/images
