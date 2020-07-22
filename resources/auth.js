@@ -24,7 +24,7 @@ exports.post = (req, res, next) => {
             const error = new Error('incorrect username or password');
             error.statusCode = 404;
             throw error;
-        }
+        } 
         
         auth_user = user;
         return bcrypt.compare(password, user.password)

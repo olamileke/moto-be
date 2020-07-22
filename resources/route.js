@@ -1,7 +1,6 @@
 const Route = require('../models/route');
 const Request = require('../models/request');
 const { validationResult }  = require('express-validator');
-const { request } = require('express');
 
 exports.put = (req, res, next) => {
     const errors = validationResult(req);
@@ -41,7 +40,15 @@ exports.put = (req, res, next) => {
             throw error;
         }
 
-        return Route.update(routeID, name, description)
+        return Route.findByName(name)
+        .then(route => {
+            if(route && route._id.toString() != routeID) {
+                const error = new Error('route with name exists already');
+                error.statusCode = 403;
+                throw error;
+            }
+            return Route.update(routeID, name, description)
+        })
     })
     .then(route => {
         updatedRoute = route;
@@ -65,8 +72,8 @@ exports.put = (req, res, next) => {
 exports.patch = (req, res, next) => {
     
     const routeID = req.params.routeID;
-    let active, patchedRoute;
-    req.query.active == 'true' ? active = true : active = false;
+    let active = true, patchedRoute;
+    req.query.active == 'false' ? active = false : '';
 
     Route.findByID(routeID)
     .then(route => {

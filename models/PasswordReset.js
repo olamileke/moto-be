@@ -3,9 +3,10 @@ const ObjectID = require('mongodb').ObjectID;
 
 class PasswordReset {
 
-    constructor(userId, name, token, expires_at, created_at) {
+    constructor(userId, name, email, token, expires_at, created_at) {
         this.userId = userId;
         this.name = name;
+        this.email = email;
         this.token = token;
         this.expires_at = expires_at;
         this.created_at = created_at;     

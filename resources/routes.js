@@ -9,7 +9,7 @@ exports.post = (req, res, next) => {
         const error = new Error('validation failed');
         error.statusCode = 422;
         error.errors = errors;
-        throw err;
+        throw error;
     }
 
     const name = req.body.name.toLowerCase();
@@ -45,13 +45,12 @@ exports.post = (req, res, next) => {
 
 exports.get = (req, res, next) => {
 
-    let admin,page, total;
-    req.query.admin == 'true' ? admin = true : admin = false;
+    let page, total;
     req.query.page ? page = req.query.page : page = 1;
     const skip = (page - 1) * per_page;
 
     if(req.query.all == 'true') {
-        Route.all(admin)
+        Route.all(req.user.admin)
         .then(routes => {
             res.status(200).json({
                 data:{
@@ -67,10 +66,10 @@ exports.get = (req, res, next) => {
         })
     } 
     else {
-        Route.count(admin)
+        Route.count(req.user.admin)
         .then(count => {
             total = count;
-            return Route.get(admin, skip, per_page);
+            return Route.get(req.user.admin, skip, per_page);
         })
         .then(routes => {
             res.status(200).json({

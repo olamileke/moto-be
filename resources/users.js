@@ -14,7 +14,7 @@ const mail = require('../utils/mail');
 exports.post = (req, res, next) => {
     const errors = validationResult(req);
 
-    if(!errors.isEmpty()) {
+    if(!errors.isEmpty()) { 
         const error = new Error('validation failed');
         error.statusCode = 422;
         error.errors = errors;

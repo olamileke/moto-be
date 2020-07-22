@@ -5,6 +5,7 @@ const mailgun = require('mailgun-js')({ apiKey:config.mailgun_api_key, domain:co
 module.exports = (data, subject, filePath, next) => {
     const mail = { ...config.mail };
     mail.subject = subject;
+    data.reset ? mail.to = data.reset.email : mail.to = data.user.email;
 
     ejs.renderFile(filePath, {
         data:data,

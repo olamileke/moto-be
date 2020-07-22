@@ -43,6 +43,7 @@ exports.post = (req, res, next) => {
             throw error;
         }
 
+        delete vehicle.active;
         delete vehicle.requests;
         delete vehicle.created_at;
         delete vehicle.pending;
@@ -56,8 +57,15 @@ exports.post = (req, res, next) => {
             const error = new Error('route does not exist');
             error.statusCode = 404;
             throw error;
-        }   
+        }
+        
+        if(!route.active) {
+            const error = new Error('route is not active');
+            error.statusCode = 400;
+            throw error;
+        }
 
+        delete route.active;
         delete route.description;
         delete route.created_at;
         delete route.trips;
@@ -89,18 +97,17 @@ exports.post = (req, res, next) => {
 }
 
 exports.get = (req, res, next) => {
-    let admin, page, total, active;
-    req.query.admin == 'true' ? admin = true : admin = false;
+    let page, total, active;
     req.query.page ? page = req.query.page : page = 1;
     req.query.active == 'true' ? active = true : active = false;
 
     const skip = (page - 1) * per_page;
 
     if(!active) {
-        Request.count(admin, req.user._id)
+        Request.count(req.user.admin, req.user._id)
         .then(count => {
             total = count;
-            return Request.get(admin, req.user._id, skip, per_page);
+            return Request.get(req.user.admin, req.user._id, skip, per_page);
         })
         .then(requests => {
             res.status(200).json({

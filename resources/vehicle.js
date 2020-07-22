@@ -89,8 +89,8 @@ exports.put = (req, res, next) => {
 exports.patch = (req, res, next) => {
 
     const vehicleID = req.params.vehicleID;
-    let active, patchedVehicle;
-    req.query.active == 'true' ? active = true : active = false;
+    let active = true, patchedVehicle;
+    req.query.active == 'false' ? active = false : '';
 
     Vehicle.findByID(vehicleID)
     .then(vehicle => {

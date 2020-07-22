@@ -91,7 +91,7 @@ async function verifyEmail(req, res, next) {
 
             const token = buffer.toString('hex');
             const expiry = Date.now() + (30 * 60 * 1000);
-            const reset = new PasswordReset(user._id, user.name, token, expiry, Date.now());
+            const reset = new PasswordReset(user._id, user.name, user.email, token, expiry, Date.now());
             reset.save()
             .then(({ ops }) => {
                 const reset = ops[0];

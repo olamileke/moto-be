@@ -47,15 +47,14 @@ exports.post = (req, res, next) => {
 }
 
 exports.get = (req, res, next) => {
-    let admin, page, total;
-    req.query.admin == 'true' ? admin = true : admin = false;
+    let page, total;
     req.query.page ? page = req.query.page : page = 1;
     const skip = (page - 1) * per_page;
 
-    Vehicle.count(admin)
+    Vehicle.count(req.user.admin)
     .then(count => {
         total = count;
-        return Vehicle.get(admin, skip, per_page)
+        return Vehicle.get(req.user.admin, skip, per_page)
     })
     .then(vehicles => { 
         res.status(200).json({

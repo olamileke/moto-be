@@ -9,7 +9,7 @@ const { body } = require('express-validator');
 const issues = require('../resources/issues');
 const issue = require('../resources/issue');
 
-router.post('/issues', authenticate, driver, multer, [ body('title').isLength({ min:8 }), body('vehicleID').isLength({ min:24 }),
+router.post('/issues', authenticate, driver, multer, [ body('title').isLength({ min:8 }),
                     body('description').isLength({ min:80 }), body('image').custom((value, { req }) => {
                         if(!req.file) {
                             return Promise.reject('image is required');
