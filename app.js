@@ -1,6 +1,5 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const path = require('path');
 const database = require('./utils/database');
 const userRoutes = require('./routes/users');
 const authRoutes = require('./routes/auth');
@@ -21,7 +20,7 @@ app.use((req, res, next) => {
 
     next();
 })
-app.use('/images', express.static(path.join(__dirname, 'images')))
+
 app.use(userRoutes);
 app.use(authRoutes);
 app.use(vehicleRoutes);
@@ -29,6 +28,12 @@ app.use(routeRoutes);
 app.use(requestRoutes);
 app.use(issueRoutes);
 app.use(passwordResetRoutes);
+
+app.use('/', (req, res, next) => {
+    const error = new Error('endpoint does not exist');
+    error.statusCode = 404;
+    throw error;
+})
 
 app.use((err, req, res, next) => {
     const statusCode = err.statusCode || 500;

@@ -4,3 +4,11 @@
 
 # images
 /images
+
+# configuration
+/utils/config.js
+
+# deployment files
+.vercel
+now.json
+
