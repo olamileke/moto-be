@@ -12,15 +12,17 @@ exports.post = (req, res, next) => {
         throw error;
     }
 
-    const name = req.body.name.toLowerCase();
+    const from = req.body.from.toLowerCase();
+    const to = req.body.to.toLowerCase();
+    const distance = req.body.distance;
     const description = req.body.description.toLowerCase(); 
 
-    const new_route = new Route(name, description, 0, true, Date.now());
+    const new_route = new Route(from, to, description, 0, distance, true, Date.now());
 
-    Route.findByName(name)
+    Route.findByName(from, to)
     .then(route => {
         if(route) {
-            const error = new Error(`${name} route exists already`);
+            const error = new Error(`${from}-${to} route exists already`);
             error.statusCode = 403;
             throw error;
         }

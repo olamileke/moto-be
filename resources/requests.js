@@ -66,6 +66,7 @@ exports.post = (req, res, next) => {
         }
 
         delete route.active;
+        delete route.distance;
         delete route.description;
         delete route.created_at;
         delete route.trips;

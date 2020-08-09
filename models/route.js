@@ -3,10 +3,12 @@ const ObjectID = require('mongodb').ObjectID;
 
 class Route
 {
-    constructor(name, description, trips, active, created_at) {
-        this.name = name;
+    constructor(from, to, description, trips, distance, active, created_at) {
+        this.from = from;
+        this.to = to
         this.description = description;
         this.trips = trips;
+        this.distance = distance;
         this.active = active;
         this.created_at = created_at;
     }
@@ -17,10 +19,10 @@ class Route
         return db.collection('routes').insertOne(this);
     }
 
-    static update(id, name, description)
+    static update(id, from, to, distance, description)
     {
         const db = getDB();
-        return db.collection('routes').updateOne({ _id:new ObjectID(id) }, { $set:{ name:name, description:description} })
+        return db.collection('routes').updateOne({ _id:new ObjectID(id) }, { $set:{ from:from, to:to, distance:distance, description:description} })
         .then(() => {
             return Route.findByID(id);
         })
@@ -38,10 +40,10 @@ class Route
         return db.collection('routes').findOne({ _id:new ObjectID(id) });
     }
 
-    static findByName(name)
+    static findByName(from, to)
     {
         const db = getDB();
-        return db.collection('routes').findOne({ name:name });
+        return db.collection('routes').findOne({ $and:[{ from:from, to:to }] });
     }
 
     static all(admin)

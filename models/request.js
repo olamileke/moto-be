@@ -47,10 +47,10 @@ class Request
         { $or:[{ pending:false }, { expires_at:{ $gte:Date.now() } }] }] }).sort({ created_at:-1 }).limit(1).toArray();
     }
 
-    static updateRoute(routeId, name)
+    static updateRoute(routeId, from, to)
     {
         const db = getDB();
-        return db.collection('requests').updateMany({ 'route._id':new ObjectID(routeId) }, { $set:{ 'route.name':name } });
+        return db.collection('requests').updateMany({ 'route._id':new ObjectID(routeId) }, { $set:{ 'route.from':from, 'route.to':to } });
     }
 
     static updateUser(userId, avatar)

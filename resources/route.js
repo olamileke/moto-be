@@ -13,7 +13,9 @@ exports.put = (req, res, next) => {
     }
 
     const routeID = req.params.routeID;
-    const name = req.body.name.toLowerCase();
+    const from = req.body.from.toLowerCase();
+    const to = req.body.to.toLowerCase();
+    const distance = req.body.distance;
     const description = req.body.description.toLowerCase();
     let updatedRoute;
 
@@ -40,19 +42,19 @@ exports.put = (req, res, next) => {
             throw error;
         }
 
-        return Route.findByName(name)
+        return Route.findByName(from, to)
         .then(route => {
             if(route && route._id.toString() != routeID) {
                 const error = new Error('route with name exists already');
                 error.statusCode = 403;
                 throw error;
             }
-            return Route.update(routeID, name, description)
+            return Route.update(routeID, from, to, distance, description)
         })
     })
     .then(route => {
         updatedRoute = route;
-        return Request.updateRoute(routeID, name);
+        return Request.updateRoute(routeID, from, to);
     })
     .then(() => {
         res.status(201).json({

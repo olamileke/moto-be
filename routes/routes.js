@@ -7,11 +7,13 @@ const authenticate = require('../middlewares/authenticate');
 const authorize = require('../middlewares/authorize');
 const admin = require('../middlewares/admin');
 
-router.post('/routes', authenticate, admin, [ body('name').isLength({ min:6 }), body('description').isLength({ min:40 }) ], routes.post);
+router.post('/routes', authenticate, admin, [ body('from').isLength({ min:3 }), body('to').isLength({ min:3 }),
+body('distance').isFloat(), body('description').isLength({ min:40 }) ], routes.post);
 
 router.get('/routes', authenticate, authorize, routes.get);
 
-router.put('/routes/:routeID', authenticate, admin, [ body('name').isLength({ min:6 }), body('description').isLength({ min:40 }) ], route.put);
+router.put('/routes/:routeID', authenticate, admin, [ body('from').isLength({ min:3 }), body('to').isLength({ min:3 }),
+body('distance').isFloat(), body('description').isLength({ min:40 }) ], route.put);
 
 router.patch('/routes/:routeID', authenticate, admin, route.patch);
 
