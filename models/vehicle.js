@@ -5,11 +5,12 @@ const ObjectID = require('mongodb').ObjectID;
 
 class Vehicle
 {
-    constructor(model, plate_number, picture, trips, active, pending, reserved_till, created_at) {
+    constructor(model, plate_number, picture, trips, mileage, active, pending, reserved_till, created_at) {
         this.model = model;
         this.plate_number = plate_number;
         this.picture = picture;
         this.trips = trips;
+        this.mileage = mileage;
         this.active= active;
         this.pending = pending;
         this.reserved_till = reserved_till;
@@ -62,11 +63,11 @@ class Vehicle
         return db.collection('vehicles').findOne({ plate_number:plate_number })
     }
 
-    static requestUpdate(id, pending, dateStamp=null, trips=null)
+    static requestUpdate(id, pending, dateStamp=null, distance=null)
     {
         const db = getDB();
         let updatedVehicle;
-        if(!dateStamp && !trips) {
+        if(!dateStamp && !distance) {
             return db.collection('vehicles').updateOne({ _id:new ObjectID(id) }, { $set:{ pending:pending } });
         }
 
@@ -76,8 +77,14 @@ class Vehicle
         })
         .then(() => {
             return db.collection('vehicles').updateOne({ _id:new ObjectID(id) },
-            { $set:{ pending:pending, reserved_till:dateStamp, trips:updatedVehicle.trips + 1 } });
+            { $set:{ pending:pending, reserved_till:dateStamp, trips:updatedVehicle.trips + 1, mileage:updatedVehicle.mileage + distance } });
         })
+    }
+
+    static resetMileage(id) 
+    {
+        const db = getDB();
+        return db.collection('vehicles').updateOne({ _id:new ObjectID(id) }, { $set:{ mileage:0 } });
     }
 
     static updateTrips(id, pending)
@@ -97,7 +104,7 @@ class Vehicle
             return db.collection('vehicles').find().sort({ created_at:-1 }).skip(skip).limit(limit).toArray();
         }
 
-        return db.collection('vehicles').find({ $and:[ { active:true }, { pending:false }, { reserved_till:{ $lt:Date.now() } } ] })
+        return db.collection('vehicles').find({ $and:[ { active:true }, { mileage:{ $lt:50 } }, { pending:false }, { reserved_till:{ $lt:Date.now() } } ] })
         .sort({ created_at:-1 }).skip(skip).limit(limit).toArray();
     }
 }

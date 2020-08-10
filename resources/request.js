@@ -19,9 +19,13 @@ exports.patch = (req, res, next) => {
 
         patchedRequest = request;
         return Request.setApprovedState(requestID, approved);
-    })
+    }) 
     .then(() => {
-        return Vehicle.requestUpdate(patchedRequest.vehicle._id, false, patchedRequest.expires_at, true);
+        if(!approved) {
+            return Vehicle.requestUpdate(patchedRequest.vehicle._id, false);
+        }
+
+        return Vehicle.requestUpdate(patchedRequest.vehicle._id, false, patchedRequest.expires_at, patchedRequest.distance);
     })
     .then(() => {
         if(approved) {

@@ -48,6 +48,7 @@ exports.post = (req, res, next) => {
         delete vehicle.created_at;
         delete vehicle.pending;
         delete vehicle.reserved_till;
+        delete vehicle.mileage;
         delete vehicle.trips;
         requested_vehicle = vehicle;
         return Route.findByID(routeID)
@@ -62,9 +63,10 @@ exports.post = (req, res, next) => {
         if(!route.active) {
             const error = new Error('route is not active');
             error.statusCode = 400;
-            throw error;
+            throw error; 
         }
 
+        const distance = route.distance;
         delete route.active;
         delete route.distance;
         delete route.description;
@@ -73,7 +75,7 @@ exports.post = (req, res, next) => {
         requested_route = route;
 
         const expires_at = Date.now() + (days * 24 * 60 * 60 * 1000);
-        const request = new Request(user, requested_vehicle, requested_route, false, true, expires_at, Date.now());
+        const request = new Request(user, requested_vehicle, requested_route, distance, false, true, expires_at, Date.now());
         return request.save();
     }) 
     .then(({ op }) => {

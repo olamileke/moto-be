@@ -90,7 +90,9 @@ exports.patch = (req, res, next) => {
 
     const vehicleID = req.params.vehicleID;
     let active = true, patchedVehicle;
+    let serviced = false;
     req.query.active == 'false' ? active = false : '';
+    req.query.serviced == 'true' ? serviced = true : '';
 
     Vehicle.findByID(vehicleID)
     .then(vehicle => {
@@ -116,10 +118,15 @@ exports.patch = (req, res, next) => {
             throw error;
         }
 
+        if(serviced) {
+            return Vehicle.resetMileage(vehicleID);
+        }
         return Vehicle.setActiveState(vehicleID, active)
     })
     .then(() => {
-        const vehicle = { ...patchedVehicle, active:active };
+        let vehicle;
+        serviced ? vehicle = { ...patchedVehicle, mileage:0 } : vehicle = vehicle = { ...patchedVehicle, active:active };
+
         res.status(200).json({
             data:{
                 vehicle:vehicle

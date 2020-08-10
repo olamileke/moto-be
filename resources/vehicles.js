@@ -26,7 +26,7 @@ exports.post = (req, res, next) => {
                 error.statusCode = 403;
                 throw error;
             }
-            const new_vehicle = new Vehicle(model, plate_number, picture, 0, true, false, Date.now(), Date.now());
+            const new_vehicle = new Vehicle(model, plate_number, picture, 0, 0, true, false, Date.now(), Date.now());
             return new_vehicle.save();
         })
         .then(({ ops }) => {
