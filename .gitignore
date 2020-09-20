@@ -2,11 +2,6 @@
 # node modules
 /node_modules
 
-# images
-/images
-
-# configuration
-/utils/config.js
 
 # deployment files
 .vercel

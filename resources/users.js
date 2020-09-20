@@ -37,11 +37,11 @@ exports.post = (req, res, next) => {
         }
 
         return crypto.randomBytes(32, (err, buffer) => {
-            if(err) {
-                const error = new Error('an error occured');
-                error.statusCode = 500;
-                throw error;
-            }
+            // if(err) {
+            //     const error = new Error('an error occured');
+            //     error.statusCode = 500;
+            //     throw error;
+            // }
 
             activationToken = buffer.toString('hex');
             return bcrypt.hash(password, 12)
@@ -53,7 +53,7 @@ exports.post = (req, res, next) => {
                 const new_user = { name:name, email:email, admin:admin, avatar:avatar };
                 const mail_user = { ...new_user, activation_token:activationToken };
                 const data = { user:mail_user }
-                mail(data, 'Activate your Account', path.join(config.app_root, 'templates', 'activate.html'), next);
+                // mail(data, 'Activate your Account', path.join(config.app_root, 'templates', 'activate.html'), next);
                 res.status(201).json({
                     data:{
                         user:new_user

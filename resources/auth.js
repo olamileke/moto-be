@@ -20,7 +20,7 @@ exports.post = (req, res, next) => {
 
     User.findByEmail(email)
     .then(user => {
-        if(!user || user.activation_token) {
+        if(!user) {
             const error = new Error('incorrect username or password');
             error.statusCode = 404;
             throw error;
