@@ -26,6 +26,11 @@ class PasswordReset {
         const db = getDB();
         return db.collection('password_resets').deleteOne({ _id:new ObjectID(id) });
     }
+
+    static deleteByUserID(userId) {
+        const db = getDB();
+        return db.collection('password_resets').deleteMany({ userId:new ObjectID(userId) });
+    }
 }
 
 module.exports = PasswordReset;

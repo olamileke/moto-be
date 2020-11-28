@@ -26,7 +26,7 @@ exports.post = (req, res, next) => {
     const password = req.body.password;
     let admin, activationToken;
     req.query.admin == 'true' ? admin = true : admin = false;
-    const avatar = config.s3_file_link + 'users/anon.png';
+    const avatar = config.s3_file_link + 'users/unknown.png';
 
     User.findByEmail(email)
     .then(user => {
@@ -53,7 +53,7 @@ exports.post = (req, res, next) => {
                 const new_user = { name:name, email:email, admin:admin, avatar:avatar };
                 const mail_user = { ...new_user, activation_token:activationToken };
                 const data = { user:mail_user }
-                mail(data, 'Activate your Account', path.join(config.app_root, 'templates', 'activate.html'), next);
+                mail(data, 'Activate your Account', path.join('templates', 'activate.html'));
                 res.status(201).json({
                     data:{
                         user:new_user
@@ -133,7 +133,7 @@ exports.put = (req, res, next) => {
         throw error;
     }
 
-    const defaultAvatar = config.s3_file_link + 'users/anon.png';
+    const defaultAvatar = config.s3_file_link + 'users/unknown.png';
     req.user.avatar != defaultAvatar ? file.delete(req.user.avatar, next) : '';
 
     file.upload(req, res, next, 'users', avatar => {

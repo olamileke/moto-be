@@ -1,4 +1,5 @@
 const express = require('express');
+const path = require('path');
 const bodyParser = require('body-parser');
 const database = require('./utils/database');
 const userRoutes = require('./routes/users');
@@ -20,6 +21,8 @@ app.use((req, res, next) => {
 
     next();
 })
+
+app.use(express.static(path.join(__dirname, 'templates')));
 
 app.use(userRoutes);
 app.use(authRoutes);

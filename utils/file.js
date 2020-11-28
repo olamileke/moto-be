@@ -24,6 +24,7 @@ exports.upload = async function upload(req, res, next, folder, cb) {
         if(err) {
             if(!err.statusCode) {
                 err.statusCode = 500;
+                console.log(err);
             }
             next(err);
             return;

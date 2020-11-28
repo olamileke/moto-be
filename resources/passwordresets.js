@@ -3,7 +3,6 @@ const PasswordReset = require('../models/PasswordReset');
 const mail = require('../utils/mail');
 const crypto = require('crypto');
 const path = require('path');
-const config = require('../utils/config');
 
 exports.post = (req, res, next) => {
     const actions = ['verify_email', 'verify_token'];
@@ -68,6 +67,7 @@ async function verifyResetToken(req, res, next) {
 
 async function verifyEmail(req, res, next) {
     const email = req.body.email;
+    let user;
 
     if(!email) {
         const error = new Error('email is required');
@@ -76,12 +76,16 @@ async function verifyEmail(req, res, next) {
     }
 
     User.findByEmail(email)
-    .then(user => {
-        if(!user) {
+    .then(result => {
+        if(!result) {
             const error = new Error('user does not exist');
             error.statusCode = 404;
             throw error;
         }
+        user = result;
+        return PasswordReset.deleteByUserID(user._id);
+    })
+    .then(() => {
 
         return crypto.randomBytes(32, (err, buffer) => {
             if(err) {
@@ -90,20 +94,13 @@ async function verifyEmail(req, res, next) {
             }
 
             const token = buffer.toString('hex');
-            const expiry = Date.now() + (30 * 60 * 1000);
+            const expiry = Date.now() + (150 * 60 * 1000);
             const reset = new PasswordReset(user._id, user.name, user.email, token, expiry, Date.now());
             reset.save()
             .then(({ ops }) => {
                 const reset = ops[0];
-                const dt = new Date(reset.expires_at);
-                const hours = dt.getHours();
-                const minutes = dt.getMinutes();
-                let hrs, mins;
-                String(hours).length == 1 ? hrs = '0' + String(hours) : hrs = String(hours);
-                String(minutes).length == 1 ? mins= '0' + String(minutes) : mins = String(minutes);
-                reset.expires_at = `${hrs}:${mins}`;
                 const data = { reset:reset };
-                mail(data, 'Change your Password', path.join(config.app_root, 'templates', 'reset_password.html'), next);
+                mail(data, 'Change your Password', path.join('templates', 'reset_password.html'));
                 res.status(200).json({
                     data:{
                         message:'password reset email sent successfully'
