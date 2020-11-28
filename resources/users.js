@@ -244,7 +244,7 @@ async function activate(req, res, next) {
 
         activatedUser = { name:user.name, email:user.email,
          admin:user.admin, avatar:user.avatar };
-        return User.activate(user._id);
+        return User.activate(user._id); 
     })
     .then(() => {
         res.status(200).json({
