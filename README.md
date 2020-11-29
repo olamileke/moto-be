@@ -69,8 +69,6 @@ After all the packages are done installing, open up the config.js file in the /u
 
 - Set s3_file_link to https://s3-**aws-region**.amazonaws.com/**bucket-name**/ with aws-region being the region of the S3 bucket and bucket-name being the name of the bucket. Make sure to remove the asterisks(*).
 
-- Finally, set the **to** property in the mail object to the verified email of your mailgun sandbox domain.
-
 - If the cloned frontend is running on a different port to 4200, set the client_url option to whatever localhost url it is running on
 
 Start the application by running
